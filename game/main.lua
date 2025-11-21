@@ -17,7 +17,7 @@ function love.draw()
 
     -- Draw play button
     love.graphics.setBlendMode("alpha")
-    love.graphics.draw(startImage, width/2, height/2, 0, 0.25, 0.25)
+    love.graphics.draw(startImage, width/2 - startImage:getWidth()/8, height/2 - startImage:getHeight()/8, 0, 0.25, 0.25)
 
     --Draw player
     love.graphics.draw(playerImage, 300, 300)
