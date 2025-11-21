@@ -57,6 +57,9 @@ function love.draw()
         -- Draw play button
         love.graphics.setBlendMode("alpha")
         love.graphics.draw(startImage, width/2 - startImage:getWidth()/8, height/2 - startImage:getHeight()/8, 0, 0.25, 0.25)
+        player.x = 300
+        player.y = 300
+        yalee:setPosition(100, 100)
         return
     end
 
