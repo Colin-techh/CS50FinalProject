@@ -1,3 +1,6 @@
+-- Library usage
+local Camera = require "libs.hump-master.camera"
+
 function love.load()
     love.window.setTitle("My Awesome Game")
     width, height = love.graphics.getDimensions()
@@ -41,11 +44,6 @@ function love.load()
         height = 32
       }
 
-    cameraX = 0
-    cameraY = 0
-    -- Define the center offset once
-    offsetX = love.graphics.getWidth() / 2
-    offsetY = love.graphics.getHeight() / 2
 end
 
 function love.draw()
@@ -64,19 +62,12 @@ function love.draw()
 
     --Draw enemies
     love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
-
-    love.graphics.push() -- Save the current drawing state
-    love.graphics.translate(-cameraX, -cameraY) -- Move the "world"
-    love.graphics.pop() -- Restore the previous drawing states
 end
 
 function love.update(dt)
     if isClicking(playButton) and isAtTitleScreen then
         isAtTitleScreen = false
     end
-
-    cameraX = player.x - offsetX
-    cameraY = player.y - offsetY
 
     require("playerMovement").update(player, yaleEnemy, key_mappings, dt)
 end
