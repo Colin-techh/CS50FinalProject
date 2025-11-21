@@ -20,12 +20,7 @@ function update(player, yaleEnemy, key_mappings, dt)
 
     player.x = player.x + input.x * player.speed * dt
     player.y = player.y + input.y * player.speed * dt
-
-    -- vX = player.x - yaleEnemy.x
-    -- vY = player.y - yaleEnemy.y
-
-    -- yaleEnemy.x = yaleEnemy.x + (vX / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
-    -- yaleEnemy.y = yaleEnemy.y + (vY / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
+    
 end
 return {
     update = update
