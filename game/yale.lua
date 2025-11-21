@@ -15,6 +15,10 @@ end
 function yaleEnemy:draw()
     love.graphics.draw(self.image, self.x, self.y)
 end
+function yaleEnemy:setPosition(x, y)
+    self.x = x
+    self.y = y
+end
 function yaleEnemy:update(player, dt)
     local vX = player.x - self.x
     local vY = player.y - self.y
