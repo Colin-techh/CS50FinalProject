@@ -20,19 +20,21 @@ function love.load()
     playerImage = love.graphics.newImage("assets/player1.png")
 
     --enemy images
-    yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
+    -- yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
 
-    local key_mappings = {
+    key_mappings = {
         up    = {"w", "up"},
         left  = {"a", "left"},
         down  = {"s", "down"},
         right = {"d", "right"},
     }
-    yaleEnemy = {
-        x = 100,
-        y = 100,
-        speed = 50
-    }
+    -- yaleEnemy = {
+    --     x = 100,
+    --     y = 100,
+    --     speed = 50
+    -- }
+    require("yale")
+    yalie = yaleEnemy:new(100, 100)
     player = {
         x = 300,
         y = 300,
@@ -57,7 +59,8 @@ function love.draw()
     love.graphics.draw(playerImage, player.x, player.y)
 
     --Draw enemies
-    love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
+    -- love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
+    yalie:draw()
 end
 
 function love.update(dt)
@@ -66,4 +69,5 @@ function love.update(dt)
     end
 
     require("playerMovement").update(player, yaleEnemy, key_mappings, dt)
+    yalie:update(player, dt)
 end
