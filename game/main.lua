@@ -41,12 +41,13 @@ function love.load()
     -- }
     require("yale")
     yalie = yaleEnemy:new(100, 100)
-    player = {
+    player = { 
         x = 300,
         y = 300,
         speed = 100,
         width = 32,
-        height = 32
+        height = 32,
+        health = 3
       }
 
 end
@@ -70,12 +71,25 @@ function love.draw()
     -- love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
     yalie:draw()
     camera:detach()
+
+    -- Draw HUD elements in screen space
+    love.graphics.print("Health: " .. player.health, 10, 10)
     
 end
 
 function love.update(dt)
     if isClicking(playButton) and isAtTitleScreen then
         isAtTitleScreen = false
+    end
+
+    if(require("collisions")(player, yalie) and not isAtTitleScreen) then
+        player.health = player.health - 1
+        player.x = 300
+        player.y = 300
+        if(player.health <= 0) then
+            isAtTitleScreen = true
+            player.health = 3
+        end
     end
 
     camera:lookAt(player.x, player.y)
