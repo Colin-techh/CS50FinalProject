@@ -17,6 +17,8 @@ function love.mousepressed(x, y, button)
 		boxes[key].y = math.sin(direction) * height/2 + y
 	end
 	
+-- https://github.com/Colin-techh/CS50FinalProject
+--         git remote add origin https://github.com/Colin-techh/CS50FinalProject
 end
 function love.update()
 	for key, value in pairs(boxes) do
