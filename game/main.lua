@@ -11,6 +11,12 @@ function love.load()
     playerImage = love.graphics.newImage("assets/player1.png")
 end
 
+local player = {
+  x = 300,
+  y = 300,
+  speed = 100
+}
+
 function love.draw()
     -- Draw the background image at the top-left corner
     love.graphics.draw(background, 0, 0)
@@ -27,12 +33,6 @@ local key_mappings = {
   left  = "a",
   down  = "s",
   right = "d"
-}
-
-local player = {
-  x = 300,
-  y = 300,
-  speed = 100
 }
 
 function love.update(dt)
