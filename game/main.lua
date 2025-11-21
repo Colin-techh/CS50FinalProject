@@ -18,7 +18,16 @@ function love.load()
 
     -- player image
     playerImage = love.graphics.newImage("assets/player1.png")
+
+    --enemy images
+    yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
 end
+
+yaleEnemy = {
+    x = 100,
+    y = 100,
+    speed = 50
+}
 
 local player = {
   x = 300,
@@ -43,6 +52,9 @@ function love.draw()
 
     --Draw player
     love.graphics.draw(playerImage, player.x, player.y)
+
+    --Draw enemies
+    love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
 end
 local key_mappings = {
     up    = "w",
@@ -64,6 +76,12 @@ function love.update(dt)
     if isDown(key_mappings.left) then input.x = -1 end
     if isDown(key_mappings.right) then input.x = 1 end
 
-    player.x = player.x + input.x * player.speed * dt
-    player.y = player.y + input.y * player.speed * dt
+  player.x = player.x + input.x * player.speed * dt
+  player.y = player.y + input.y * player.speed * dt
+
+  vX = player.x - yaleEnemy.x
+  vY = player.y - yaleEnemy.y
+
+  yaleEnemy.x = yaleEnemy.x + (vX / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
+  yaleEnemy.y = yaleEnemy.y + (vY / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
 end
