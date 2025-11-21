@@ -1,6 +1,8 @@
 -- Library usage
 local Camera = require "libs.hump-master.camera"
 
+camera = Camera(0, 0)
+
 function love.load()
     love.window.setTitle("My Awesome Game")
     width, height = love.graphics.getDimensions()
@@ -69,5 +71,9 @@ function love.update(dt)
         isAtTitleScreen = false
     end
 
+    camera:lookAt(player.x, player.y)
+        if isAtTitleScreen then
+            return
+        end
     require("playerMovement").update(player, yaleEnemy, key_mappings, dt)
 end
