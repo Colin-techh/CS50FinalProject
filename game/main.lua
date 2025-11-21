@@ -22,7 +22,7 @@ function love.load()
     --enemy images
     yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
 
-    local key_mappings = {
+    key_mappings = {
         up    = {"w", "up"},
         left  = {"a", "left"},
         down  = {"s", "down"},
