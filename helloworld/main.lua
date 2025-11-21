@@ -30,4 +30,3 @@ function love.draw()
 		boxes[key]:draw()
 	end
 end
-vvtgv
