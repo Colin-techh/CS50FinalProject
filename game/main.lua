@@ -9,6 +9,9 @@ function love.load()
 
     -- player image
     playerImage = love.graphics.newImage("assets/player1.png")
+
+    --enemy images
+    yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
 end
 
 local player = {
@@ -27,6 +30,9 @@ function love.draw()
 
     --Draw player
     love.graphics.draw(playerImage, player.x, player.y)
+
+    --Draw enemies
+    love.graphics.draw(yaleEnemyImage, 100, 100)
 end
 local key_mappings = {
   up    = "w",
