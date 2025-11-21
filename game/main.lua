@@ -38,7 +38,7 @@ function love.draw()
     love.graphics.draw(playerImage, player.x, player.y)
 
     --Draw enemies
-    love.graphics.draw(yaleEnemyImage, 100, 100)
+    love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
 end
 local key_mappings = {
   up    = "w",
