@@ -67,6 +67,7 @@ function love.draw()
 
     love.graphics.push() -- Save the current drawing state
     love.graphics.translate(-cameraX, -cameraY) -- Move the "world"
+    love.graphics.pop() -- Restore the previous drawing states
 end
 
 function love.update(dt)
