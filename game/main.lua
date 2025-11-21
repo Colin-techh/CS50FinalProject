@@ -5,6 +5,9 @@ function love.load()
 
     -- Press play
     startImage = love.graphics.newImage("assets/startImage.png")
+
+    -- player image
+    playerImage = love.graphics.newImage("assets/player1.png")
 end
 
 function love.draw()
@@ -14,4 +17,7 @@ function love.draw()
     -- Draw play button
     love.graphics.setBlendMode("alpha")
     love.graphics.draw(startImage, 100, 100, 0, 0.25, 0.25)
+
+    --Draw player
+    love.graphics.draw(playerImage, 300, 300)
 end
