@@ -1,7 +1,7 @@
 function love.load()
     love.window.setTitle("My Awesome Game")
     -- Background image
-    background = love.graphics.newImage("background.png")
+    background = love.graphics.newImage("assets/background.png")
 
     -- Press play
     startImage = love.graphics.newImage("startImage.png")
