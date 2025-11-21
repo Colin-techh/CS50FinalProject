@@ -20,5 +20,30 @@ function love.draw()
     love.graphics.draw(startImage, width/2, height/2, 0, 0.25, 0.25)
 
     --Draw player
-    love.graphics.draw(playerImage, 300, 300)
+    love.graphics.draw(playerImage, player.x, player.y)
+end
+local key_mappings = {
+  up    = "w",
+  left  = "a",
+  down  = "s",
+  right = "d"
+}
+
+local player = {
+  x = 300,
+  y = 300,
+  speed = 100
+}
+
+function love.update(dt)
+  local input = {x = 0, y = 0}
+  local isDown = love.keyboard.isDown
+
+  if isDown(key_mappings.up) then input.y = -1 end
+  if isDown(key_mappings.down) then input.y = 1 end
+  if isDown(key_mappings.left) then input.x = -1 end
+  if isDown(key_mappings.right) then input.x = 1 end
+
+  player.x = player.x + input.x * player.speed * dt
+  player.y = player.y + input.y * player.speed * dt
 end
