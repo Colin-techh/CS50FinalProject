@@ -30,11 +30,11 @@ yaleEnemy = {
 }
 
 local player = {
-  x = 300,
-  y = 300,
-  speed = 100,
-  width = 32,
-  height = 32
+    x = 300,
+    y = 300,
+    speed = 100,
+    width = 32,
+    height = 32
 }
 
 function love.draw()
@@ -57,14 +57,10 @@ function love.draw()
     love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
 end
 local key_mappings = {
-    up    = "w",
-    left  = "a",
-    down  = "s",
-    right = "d",
-    up = "up",
-    left = "left",
-    down = "down",
-    right = "right"
+    up    = {"w", "up"},
+    left  = {"a", "left"},
+    down  = {"s", "down"},
+    right = {"d", "right"},
 }
 
 function love.update(dt)
@@ -73,19 +69,30 @@ function love.update(dt)
     end
 
     local input = {x = 0, y = 0}
-    local isDown = love.keyboard.isDown
+
+    local isDown = function(mapping)
+        if type(mapping) == "string" then
+            return love.keyboard.isDown(mapping)
+        elseif type(mapping) == "table" then
+            for _, k in ipairs(mapping) do
+                if love.keyboard.isDown(k) then return true end
+            end
+            return false
+        end
+        return false
+    end
 
     if isDown(key_mappings.up) then input.y = -1 end
     if isDown(key_mappings.down) then input.y = 1 end
     if isDown(key_mappings.left) then input.x = -1 end
     if isDown(key_mappings.right) then input.x = 1 end
 
-  player.x = player.x + input.x * player.speed * dt
-  player.y = player.y + input.y * player.speed * dt
+    player.x = player.x + input.x * player.speed * dt
+    player.y = player.y + input.y * player.speed * dt
 
-  vX = player.x - yaleEnemy.x
-  vY = player.y - yaleEnemy.y
+    vX = player.x - yaleEnemy.x
+    vY = player.y - yaleEnemy.y
 
-  yaleEnemy.x = yaleEnemy.x + (vX / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
-  yaleEnemy.y = yaleEnemy.y + (vY / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
+    yaleEnemy.x = yaleEnemy.x + (vX / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
+    yaleEnemy.y = yaleEnemy.y + (vY / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
 end
