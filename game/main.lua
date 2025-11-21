@@ -21,21 +21,26 @@ function love.load()
 
     --enemy images
     yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
+
+    key_mappings = {
+        up    = "w",
+        left  = "a",
+        down  = "s",
+        right = "d"
+    }
+    yaleEnemy = {
+        x = 100,
+        y = 100,
+        speed = 50
+    }
+    player = {
+        x = 300,
+        y = 300,
+        speed = 100,
+        width = 32,
+        height = 32
+      }
 end
-
-yaleEnemy = {
-    x = 100,
-    y = 100,
-    speed = 50
-}
-
-local player = {
-  x = 300,
-  y = 300,
-  speed = 100,
-  width = 32,
-  height = 32
-}
 
 function love.draw()
     if isAtTitleScreen then
@@ -48,40 +53,17 @@ function love.draw()
     -- Draw the background image at the top-left corner
     love.graphics.draw(background, 0, 0)
 
-    
-
     --Draw player
     love.graphics.draw(playerImage, player.x, player.y)
 
     --Draw enemies
     love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
 end
-local key_mappings = {
-    up    = "w",
-    left  = "a",
-    down  = "s",
-    right = "d"
-}
 
 function love.update(dt)
     if isClicking(playButton) and isAtTitleScreen then
         isAtTitleScreen = false
     end
 
-    local input = {x = 0, y = 0}
-    local isDown = love.keyboard.isDown
-
-    if isDown(key_mappings.up) then input.y = -1 end
-    if isDown(key_mappings.down) then input.y = 1 end
-    if isDown(key_mappings.left) then input.x = -1 end
-    if isDown(key_mappings.right) then input.x = 1 end
-
-  player.x = player.x + input.x * player.speed * dt
-  player.y = player.y + input.y * player.speed * dt
-
-  vX = player.x - yaleEnemy.x
-  vY = player.y - yaleEnemy.y
-
-  yaleEnemy.x = yaleEnemy.x + (vX / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
-  yaleEnemy.y = yaleEnemy.y + (vY / math.sqrt(vX^2 + vY^2)) * yaleEnemy.speed * dt
+    require("playerMovement").update(player, yaleEnemy, key_mappings, dt)
 end
