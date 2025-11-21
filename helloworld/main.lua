@@ -32,3 +32,7 @@ function love.draw()
 end
 
 -- hello n***** levi
+
+
+
+-- ninja
