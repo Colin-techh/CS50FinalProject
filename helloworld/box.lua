@@ -5,6 +5,7 @@ box = {}
 		self.__index = self
 		return setmetatable(newObject, self)
 	end
+    -- Test
 	function box:draw()
 		love.graphics.rectangle("fill", self.x,self.y,10,10)
 	end
