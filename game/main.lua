@@ -57,10 +57,14 @@ function love.draw()
     love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
 end
 local key_mappings = {
-    up    = "w" OR "up",
-    left  = "a" OR "left",
-    down  = "s" OR "down",
-    right = "d" OR "right"
+    up    = "w",
+    left  = "a",
+    down  = "s",
+    right = "d",
+    up = "up",
+    left = "left",
+    down = "down",
+    right = "right"
 }
 
 function love.update(dt)
