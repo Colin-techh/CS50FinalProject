@@ -40,6 +40,12 @@ function love.load()
         width = 32,
         height = 32
       }
+
+    cameraX = 0
+    cameraY = 0
+    -- Define the center offset once
+    offsetX = love.graphics.getWidth() / 2
+    offsetY = love.graphics.getHeight() / 2
 end
 
 function love.draw()
@@ -58,12 +64,18 @@ function love.draw()
 
     --Draw enemies
     love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
+
+    love.graphics.push() -- Save the current drawing state
+    love.graphics.translate(-cameraX, -cameraY) -- Move the "world"
 end
 
 function love.update(dt)
     if isClicking(playButton) and isAtTitleScreen then
         isAtTitleScreen = false
     end
+
+    cameraX = player.x - offsetX
+    cameraY = player.y - offsetY
 
     require("playerMovement").update(player, yaleEnemy, key_mappings, dt)
 end
