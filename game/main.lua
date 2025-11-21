@@ -84,6 +84,8 @@ function love.update(dt)
 
     if(require("collisions")(player, yalie) and not isAtTitleScreen) then
         player.health = player.health - 1
+        player.x = 300
+        player.y = 300
         if(player.health <= 0) then
             isAtTitleScreen = true
             player.health = 3
