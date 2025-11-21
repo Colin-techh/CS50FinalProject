@@ -12,7 +12,7 @@ end
 function love.mousepressed(x, y, button)
 	-- On button press, send boxes around in random direction
 	for key, value in pairs(boxes) do
-		local direction = math.random() * 2 * math.pi
+		local direction = math.random() * 3 * math.pi
 		boxes[key].x = math.cos(direction) * width/2 + x
 		boxes[key].y = math.sin(direction) * height/2 + y
 	end
