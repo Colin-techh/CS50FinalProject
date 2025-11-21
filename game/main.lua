@@ -56,14 +56,17 @@ function love.draw()
         return
     end
 
-    -- Draw the background image at the top-left corner
+    -- Attach camera so the view follows the player
+    camera:attach()
+
+    -- Draw the background image at the top-left corner (world coordinates)
     love.graphics.draw(background, 0, 0)
 
-    --Draw player
+    -- Draw player and enemies in world space
     love.graphics.draw(playerImage, player.x, player.y)
-
-    --Draw enemies
     love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
+
+    camera:detach()
 end
 
 function love.update(dt)
