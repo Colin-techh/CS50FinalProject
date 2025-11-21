@@ -4,7 +4,7 @@ function love.load()
     background = love.graphics.newImage("assets/background.png")
 
     -- Press play
-    startImage = love.graphics.newImage("startImage.png")
+    startImage = love.graphics.newImage("assets/startImage.png")
 end
 
 function love.draw()
