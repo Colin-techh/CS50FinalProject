@@ -1,8 +1,8 @@
 yaleEnemy = {}
-function yaleEnemy:new(x, y)
+function yaleEnemy:new(xx, yy)
     local obj = {
-        x = x or 0,
-        y = y or 0,
+        x = xx or 0,
+        y = yy or 0,
         width = 32,
         height = 32,
         speed = 50,

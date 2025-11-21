@@ -1,3 +1,8 @@
+-- Library usage
+local Camera = require "libs.hump-master.camera"
+
+camera = Camera(0, 0)
+
 function love.load()
     love.window.setTitle("My Awesome Game")
     width, height = love.graphics.getDimensions()
@@ -22,6 +27,7 @@ function love.load()
     --enemy images
     -- yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
 
+    
     key_mappings = {
         up    = {"w", "up"},
         left  = {"a", "left"},
@@ -42,6 +48,7 @@ function love.load()
         width = 32,
         height = 32
       }
+
 end
 
 function love.draw()
@@ -52,15 +59,18 @@ function love.draw()
         return
     end
 
-    -- Draw the background image at the top-left corner
+    -- Attach camera so the view follows the player
+    camera:attach()
+
+    -- Draw the background image at the top-left corner (world coordinates)
     love.graphics.draw(background, 0, 0)
 
-    --Draw player
+    -- Draw player and enemies in world space
     love.graphics.draw(playerImage, player.x, player.y)
-
-    --Draw enemies
     -- love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
     yalie:draw()
+    camera:detach()
+    
 end
 
 function love.update(dt)
@@ -68,6 +78,10 @@ function love.update(dt)
         isAtTitleScreen = false
     end
 
+    camera:lookAt(player.x, player.y)
+        if isAtTitleScreen then
+            return
+        end
     require("playerMovement").update(player, yaleEnemy, key_mappings, dt)
     yalie:update(player, dt)
 end
