@@ -23,10 +23,6 @@ function love.load()
 
     -- player image
     playerImage = love.graphics.newImage("assets/player1.png")
-
-    --enemy images
-    -- yaleEnemyImage = love.graphics.newImage("assets/enemy1.png")
-
     
     key_mappings = {
         up    = {"w", "up"},
@@ -34,11 +30,6 @@ function love.load()
         down  = {"s", "down"},
         right = {"d", "right"},
     }
-    -- yaleEnemy = {
-    --     x = 100,
-    --     y = 100,
-    --     speed = 50
-    -- }
     require("yale")
     yalie = yaleEnemy:new(100, 100)
     player = { 

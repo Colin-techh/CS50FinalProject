@@ -1,19 +1,11 @@
+enemy = require("enemy")
 yaleEnemy = {}
+yaleEnemy.__index = yaleEnemy
 function yaleEnemy:new(xx, yy)
-    local obj = {
-        x = xx or 0,
-        y = yy or 0,
-        width = 32,
-        height = 32,
-        speed = 50,
-        image = love.graphics.newImage("assets/enemy1.png")
-    }
-    self.__index = self
-    setmetatable(obj, self)
+    local obj = enemy:new(xx, yy, 32, 32, 50, 5, "assets/enemy1.png")
+    setmetatable(self, {__index = enemy})
+    setmetatable(obj, {__index = self})
     return obj
-end
-function yaleEnemy:draw()
-    love.graphics.draw(self.image, self.x, self.y)
 end
 function yaleEnemy:setPosition(x, y)
     self.x = x
