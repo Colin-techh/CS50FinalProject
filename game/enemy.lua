@@ -1,5 +1,4 @@
 enemy = {}
--- enemy.__index = enemy
 function enemy:new(xx, yy, width, height, speed, health, imagePath)
     local obj = {
         x = xx or 0,
