@@ -2,7 +2,7 @@ enemy = require("enemy")
 yaleEnemy = {}
 yaleEnemy.__index = yaleEnemy
 function yaleEnemy:new(xx, yy)
-    local obj = enemy:new(xx, yy, 32, 32, 50, 5, "assets/enemy1.png")
+    local obj = enemy:new(xx, yy, 32, 32, 50,1,48, 5, "assets/enemy1.png")
     setmetatable(self, {__index = enemy})
     setmetatable(obj, {__index = self})
     return obj

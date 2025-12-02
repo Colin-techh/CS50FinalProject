@@ -1,4 +1,4 @@
-function update(player, yaleEnemy, key_mappings, dt)
+function update(player, key_mappings, dt)
     local input = {x = 0, y = 0}
 
     local isDown = function(mapping)
@@ -31,25 +31,7 @@ function update(player, yaleEnemy, key_mappings, dt)
         end
     end
 
-    -- Collision & knockback: if colliding and not invulnerable, apply damage and knockback
-    local collides = require("collisions")(player, yaleEnemy)
-    if collides and not player.isInvulnerable then
-        -- reduce health
-        player.health = player.health - 1
-
-        -- knockback displacement away from enemy
-        local dx = player.x - yaleEnemy.x
-        local dy = player.y - yaleEnemy.y
-        local dist = math.sqrt(dx*dx + dy*dy)
-        if dist == 0 then dist = 0.0001 end
-        local knockbackAmount = 48 -- pixels, tweak this value
-        player.x = player.x + (dx / dist) * knockbackAmount
-        player.y = player.y + (dy / dist) * knockbackAmount
-
-        -- start invulnerability frames
-        player.isInvulnerable = true
-        player.invulnTimer = player.invulnDuration or 1.0
-    end
+    
 end
 
 return {

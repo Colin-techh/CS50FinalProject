@@ -31,18 +31,24 @@ function love.load()
         right = {"d", "right"},
     }
     require("yale")
-    yalie = yaleEnemy:new(100, 100)
-        player = { 
-                x = 300,
-                y = 300,
-                speed = 100,
-                width = 32,
-                height = 32,
-                health = 3,
-                isInvulnerable = false,
-                invulnTimer = 0,
-                invulnDuration = 1.0
-            }
+
+    enemySet = {}
+    for i=1,5 do
+        local enemy = yaleEnemy:new(math.random(0, 800), math.random(0, 600))
+        addEnemy(enemy)
+    end
+
+    player = { 
+        x = 300,
+        y = 300,
+        speed = 100,
+        width = 32,
+        height = 32,
+        health = 3,
+        isInvulnerable = false,
+        invulnTimer = 0,
+        invulnDuration = 1.0
+    }
 
 end
 
@@ -53,7 +59,7 @@ function love.draw()
         love.graphics.draw(startImage, width/2 - startImage:getWidth()/8, height/2 - startImage:getHeight()/8, 0, 0.25, 0.25)
         player.x = 300
         player.y = 300
-        yalie:setPosition(100, 100)
+        
         return
     end
 
@@ -75,8 +81,10 @@ function love.draw()
     love.graphics.draw(playerImage, player.x, player.y)
     love.graphics.setColor(1, 1, 1, 1)
 
-    -- love.graphics.draw(yaleEnemyImage, yaleEnemy.x, yaleEnemy.y)
-    yalie:draw()
+    for index, enemy in pairs(enemySet) do
+        enemy:draw()
+    end
+    -- yalie:draw()
     camera:detach()
 
     -- Draw HUD elements in screen space
@@ -94,11 +102,17 @@ function love.update(dt)
         return
     end
 
-    -- update player movement and handle knockback/damage inside the module
-    require("playerMovement").update(player, yalie, key_mappings, dt)
+    -- update player movement
+    require("playerMovement").update(player, key_mappings, dt)
+    -- update colision and handle damage
+    for index, enemy in pairs(enemySet) do
+        require("handleDamage")({player = player, enemy = enemy})
+    end
 
     -- enemy AI update
-    yalie:update(player, dt)
+    for index, enemy in pairs(enemySet) do
+        enemy:update(player, dt)
+    end
 
     -- handle death / reset here so gameplay module doesn't need global state
     if player.health <= 0 then
@@ -106,6 +120,12 @@ function love.update(dt)
         player.health = 3
         player.x = 300
         player.y = 300
-        yalie:setPosition(100, 100)
+        for index, enemy in pairs(enemySet) do
+            enemy:setPosition(math.random(0, 800), math.random(0, 600))
+        end
     end
+end
+
+function addEnemy(enemy)
+    table.insert(enemySet, enemy)
 end
