@@ -31,10 +31,14 @@ function love.load()
         right = {"d", "right"},
     }
     require("yale")
-
+    require("brown")
     enemySet = {}
     for i=1,5 do
         local enemy = yaleEnemy:new(math.random(0, 800), math.random(0, 600))
+        addEnemy(enemy)
+    end
+    for i=1,5 do
+        local enemy = brownEnemy:new(math.random(0, 800), math.random(0, 600))
         addEnemy(enemy)
     end
 

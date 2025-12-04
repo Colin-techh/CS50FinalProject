@@ -1,5 +1,6 @@
 enemy = {}
-function enemy:new(xx, yy, width, height, speed, damage, knockback, health, imagePath)
+function enemy:new(options)
+    local xx, yy, width, height, speed, damage, knockback, health, imagePath = options.x, options.y, options.width, options.height, options.speed, options.damage, options.knockback, options.health, options.imagePath
     local obj = {
         x = xx or 0,
         y = yy or 0,

@@ -1,0 +1,42 @@
+enemy = require("enemy")
+brownEnemy = {}
+function brownEnemy:new(xx, yy)
+    local obj = enemy:new({x=xx, y=yy, width=21, height=29, speed=100, damage=1, knockback=48, health=5, imagePath="assets/enemy2.png"})
+    setmetatable(self, {__index = enemy})
+    setmetatable(obj, {__index = self})
+    return obj
+end
+function enemy:draw()
+    love.graphics.draw(self.image, self.x, self.y)
+
+end
+function brownEnemy:attack()
+    -- Create smoke cloud that deals DoT to player if they are inside it
+    
+end
+function brownEnemy:update(options)
+    player, dt, enemySet = options.player, options.dt, options.enemySet
+    for index, enemy in pairs(enemySet) do
+        local collides = require("collisions")(enemy, self)
+        if collides then
+            local dx = self.x - enemy.x
+            local dy = self.y - enemy.y
+            local dist = math.sqrt(dx*dx + dy*dy)
+            if dist == 0 then dist = 0.0001 end
+            self.x = self.x + (dx / dist) * 1
+            self.y = self.y + (dy / dist) * 1
+        end
+    end
+
+    local vX = player.x - self.x
+    local vY = player.y - self.y
+    local distance = math.sqrt(vX^2 + vY^2)
+    if distance > 100 then
+        self.x = self.x + (vX / distance) * self.speed * dt
+        self.y = self.y + (vY / distance) * self.speed * dt
+    end
+
+    if os.time() % 5 == 0 then
+        self:attack()
+    end
+end
