@@ -22,6 +22,17 @@ function update(player, key_mappings, dt)
     player.x = player.x + input.x * player.speed * dt
     player.y = player.y + input.y * player.speed * dt
 
+    -- Update facing based on last input (cardinal directions only)
+    if input.x > 0 then
+        player.facing = "right"
+    elseif input.x < 0 then
+        player.facing = "left"
+    elseif input.y < 0 then
+        player.facing = "up"
+    elseif input.y > 0 then
+        player.facing = "down"
+    end
+
     -- Handle invulnerability timer
     if player.isInvulnerable then
         player.invulnTimer = player.invulnTimer - dt
