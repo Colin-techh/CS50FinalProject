@@ -25,12 +25,17 @@ function update(player, key_mappings, dt)
     -- Update facing based on last input (cardinal directions only)
     if input.x > 0 then
         player.facing = "right"
+        player.lastHorizontalFacing = "right"
     elseif input.x < 0 then
         player.facing = "left"
-    elseif input.y < 0 then
-        player.facing = "up"
-    elseif input.y > 0 then
-        player.facing = "down"
+        player.lastHorizontalFacing = "left"
+    else
+        -- only update vertical facing when there's no horizontal input
+        if input.y < 0 then
+            player.facing = "up"
+        elseif input.y > 0 then
+            player.facing = "down"
+        end
     end
 
     -- Handle invulnerability timer
