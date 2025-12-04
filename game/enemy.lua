@@ -28,4 +28,25 @@ function enemy:setPosition(x, y)
     self.x = x
     self.y = y
 end
+function enemy:update(options)
+    player, dt, enemySet = options.player, options.dt, options.enemySet
+    for index, enemy in pairs(enemySet) do
+        local collides = require("collisions")(enemy, self)
+        if collides then
+            local dx = self.x - enemy.x
+            local dy = self.y - enemy.y
+            local dist = math.sqrt(dx*dx + dy*dy)
+            if dist == 0 then dist = 0.0001 end
+            self.x = self.x + (dx / dist) * 1
+            self.y = self.y + (dy / dist) * 1
+        end
+    end
+    local vX = player.x - self.x
+    local vY = player.y - self.y
+    local distance = math.sqrt(vX^2 + vY^2)
+    if distance > 0 then
+        self.x = self.x + (vX / distance) * self.speed * dt
+        self.y = self.y + (vY / distance) * self.speed * dt
+    end
+end
 return enemy

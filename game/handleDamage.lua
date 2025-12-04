@@ -1,7 +1,7 @@
 function damage(options)
     player, enemy = options.player, options.enemy
     damage = enemy.damage
-    knockbackAmount = enemy.knockback
+    local knockbackAmount = enemy.knockback
 
     -- Collision & knockback: if colliding and not invulnerable, apply damage and knockback
     local collides = require("collisions")(player, enemy)

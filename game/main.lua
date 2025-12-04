@@ -111,7 +111,7 @@ function love.update(dt)
 
     -- enemy AI update
     for index, enemy in pairs(enemySet) do
-        enemy:update(player, dt)
+        enemy:update({player = player, dt = dt, enemySet = enemySet})
     end
 
     -- handle death / reset here so gameplay module doesn't need global state

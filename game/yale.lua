@@ -11,12 +11,13 @@ function yaleEnemy:setPosition(x, y)
     self.x = x
     self.y = y
 end
-function yaleEnemy:update(player, dt)
-    local vX = player.x - self.x
-    local vY = player.y - self.y
-    local distance = math.sqrt(vX^2 + vY^2)
-    if distance > 0 then
-        self.x = self.x + (vX / distance) * self.speed * dt
-        self.y = self.y + (vY / distance) * self.speed * dt
-    end
-end
+-- function yaleEnemy:update(options)
+--     player, dt, enemySet = options.player, options.dt, options.enemySet
+--     local vX = player.x - self.x
+--     local vY = player.y - self.y
+--     local distance = math.sqrt(vX^2 + vY^2)
+--     if distance > 0 then
+--         self.x = self.x + (vX / distance) * self.speed * dt
+--         self.y = self.y + (vY / distance) * self.speed * dt
+--     end
+-- end
