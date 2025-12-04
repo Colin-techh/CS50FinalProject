@@ -48,6 +48,7 @@ function love.load()
         width = 32,
         height = 32,
         health = 3,
+        xp = 0;
         isInvulnerable = false,
         invulnTimer = 0,
                 invulnDuration = 1.0,
@@ -110,8 +111,8 @@ function love.update(dt)
 
     -- update player movement
     require("playerMovement").update(player, key_mappings, dt)
-    -- update sword timing/attacks
-    sword.update(player, dt)
+    -- update sword timing/attacks (pass enemySet for hit detection)
+    sword.update(player, enemySet, dt)
     -- update colision and handle damage
     for index, enemy in pairs(enemySet) do
         require("handleDamage")({player = player, enemy = enemy})
@@ -120,6 +121,10 @@ function love.update(dt)
     -- enemy AI update
     for index, enemy in pairs(enemySet) do
         enemy:update({player = player, dt = dt, enemySet = enemySet})
+        if(enemy.health <= 0) then
+            table.remove(enemySet, index)
+            player.xp = player.xp + enemy.xp
+        end
     end
 
     -- handle death / reset here so gameplay module doesn't need global state

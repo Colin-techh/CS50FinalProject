@@ -4,13 +4,15 @@ local swordImage
 local attackInterval = 1.5    -- seconds between automatic slashes
 local attackDuration = 0.25   -- how long the slash is visible
 local reach = 38              -- distance from player's center to sword center
+damage = 1                    -- damage per hit
 
 local state = {
     timer = 0,
     attacking = false,
     attackTimer = 0,
     dir = "down",
-    drawScale = 1
+    drawScale = 1,
+    hitEnemies = {}
 }
 
 function Sword.load()
@@ -26,7 +28,7 @@ function Sword.load()
 end
 
 -- Call this every frame. Pass the player so we can read facing.
-function Sword.update(player, dt)
+function Sword.update(player, enemySet, dt)
     state.timer = state.timer + dt
     if state.attacking then
         state.attackTimer = state.attackTimer - dt
@@ -40,6 +42,57 @@ function Sword.update(player, dt)
             state.attacking = true
             state.attackTimer = attackDuration
             state.dir = player.facing or "down"
+            -- reset hit list so each attack can hit enemies once
+            state.hitEnemies = {}
+        end
+    end
+
+    -- while attacking, check for hits against enemies
+    if state.attacking and enemySet then
+        local iw, ih = swordImage and swordImage:getWidth() or 8, swordImage and swordImage:getHeight() or 8
+        local w, h = (iw * state.drawScale) * 0.6, (ih * state.drawScale) * 0.6
+        local px = player.x + (player.width or 0)/2
+        local py = player.y + (player.height or 0)/2
+        local ax = px
+        local ay = py
+        if state.dir == "right" then
+            ax = px + reach
+            ay = py
+        elseif state.dir == "left" then
+            ax = px - reach
+            ay = py
+        elseif state.dir == "up" then
+            ax = px
+            ay = py - reach
+        else
+            ax = px
+            ay = py + reach
+        end
+
+        local attackBox = { x = ax - w/2, y = ay - h/2, width = w, height = h }
+        local isColliding = require("collisions")
+        for _, enemy in pairs(enemySet) do
+            if enemy and not state.hitEnemies[enemy] and isColliding(attackBox, enemy) then
+                -- apply damage
+                local damage = 1
+                if enemy.decreaseHealth then
+                    enemy:decreaseHealth(damage)
+                else
+                    enemy.health = (enemy.health or 0) - damage
+                end
+
+                -- apply knockback to enemy away from attack center
+                local dx = enemy.x + (enemy.width or 0)/2 - ax
+                local dy = enemy.y + (enemy.height or 0)/2 - ay
+                local dist = math.sqrt(dx*dx + dy*dy)
+                if dist == 0 then dist = 0.0001 end
+                local kb = enemy.knockback or 20
+                enemy.x = enemy.x + (dx / dist) * kb
+                enemy.y = enemy.y + (dy / dist) * kb
+
+                -- mark hit so same attack doesn't hit twice
+                state.hitEnemies[enemy] = true
+            end
         end
     end
 end
