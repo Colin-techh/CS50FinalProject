@@ -9,6 +9,7 @@ function enemy:new(xx, yy, width, height, speed, damage, knockback, health, imag
         speed = speed or 50,
         damage = damage or 1,
         knockback = knockback or 20,
+        xp = xp or 5;
         image = love.graphics.newImage(imagePath or "assets/enemy1.png")
     }
     obj.__index = self
