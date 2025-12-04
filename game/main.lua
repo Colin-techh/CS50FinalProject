@@ -23,6 +23,9 @@ function love.load()
 
     -- player image
     playerImage = love.graphics.newImage("assets/player1.png")
+    -- sword (automatic slash)
+    sword = require("sword")
+    sword.load()
     
     key_mappings = {
         up    = {"w", "up"},
@@ -47,7 +50,8 @@ function love.load()
         health = 3,
         isInvulnerable = false,
         invulnTimer = 0,
-        invulnDuration = 1.0
+                invulnDuration = 1.0,
+                facing = "down"
     }
 
 end
@@ -84,6 +88,8 @@ function love.draw()
     for index, enemy in pairs(enemySet) do
         enemy:draw()
     end
+    -- draw sword slash (world space)
+    sword.draw(player)
     -- yalie:draw()
     camera:detach()
 
@@ -104,6 +110,8 @@ function love.update(dt)
 
     -- update player movement
     require("playerMovement").update(player, key_mappings, dt)
+    -- update sword timing/attacks
+    sword.update(player, dt)
     -- update colision and handle damage
     for index, enemy in pairs(enemySet) do
         require("handleDamage")({player = player, enemy = enemy})
