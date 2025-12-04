@@ -4,7 +4,7 @@ local projectile = require("projectile")
 -- Configurable stats
 local fireRate = .5          -- shots per second
 local damage = 2            -- damage per bullet
-local bulletSpeed = 480     -- pixels/sec
+local bulletSpeed = 240     -- pixels/sec
 local bulletLifetime = 2.0  -- seconds
 local bulletDisplaySize = 12 -- target display size in pixels for bullet
 local pistolDisplaySize = 27 -- target pistol image size (75% of previous 36)
