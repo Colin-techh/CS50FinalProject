@@ -83,7 +83,7 @@ function love.draw()
     if player.isInvulnerable then
         local flashOn = math.floor(love.timer.getTime() * 10) % 2 == 0
         if flashOn then
-            love.graphics.setColor(1, 1, 1, 0.35)
+            love.graphics.setColor(1, 1, 1, 0.35) 
         end
     end
 
