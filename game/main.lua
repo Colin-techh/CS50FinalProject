@@ -33,9 +33,12 @@ function love.load()
         down  = {"s", "down"},
         right = {"d", "right"},
     }
+    -- Enemy setup
     require("yale")
     require("brown")
+
     enemySet = {}
+
     for i=1,5 do
         local enemy = yaleEnemy:new(math.random(0, 800), math.random(0, 600))
         addEnemy(enemy)
@@ -44,7 +47,7 @@ function love.load()
         local enemy = brownEnemy:new(math.random(0, 800), math.random(0, 600))
         addEnemy(enemy)
     end
-
+    -- Player
     player = { 
         x = 300,
         y = 300,
@@ -59,6 +62,8 @@ function love.load()
                 facing = "down"
     }
 
+    -- Projectiles
+    projectiles = {}
 end
 
 function love.draw()
@@ -93,9 +98,11 @@ function love.draw()
     for index, enemy in pairs(enemySet) do
         enemy:draw()
     end
+    for index, projectile in pairs(projectiles) do
+        projectile:draw()
+    end
     -- draw sword slash (world space)
     sword.draw(player)
-    -- yalie:draw()
     camera:detach()
 
     -- Draw HUD elements in screen space
@@ -129,6 +136,13 @@ function love.update(dt)
         if(enemy.health <= 0) then
             table.remove(enemySet, index)
             player.xp = player.xp + enemy.xp
+        end
+    end
+
+    for index, projectile in pairs(projectiles) do
+        projectile:update(dt)
+        if projectile.isExpired then
+            table.remove(projectiles, index)
         end
     end
 

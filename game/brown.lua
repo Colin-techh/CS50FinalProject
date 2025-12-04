@@ -1,18 +1,20 @@
 enemy = require("enemy")
 brownEnemy = {}
+
+require("smokeCloud")
 function brownEnemy:new(xx, yy)
     local obj = enemy:new({x=xx, y=yy, width=21, height=29, speed=100, damage=1, knockback=48, health=5, imagePath="assets/enemy2.png"})
     setmetatable(self, {__index = enemy})
     setmetatable(obj, {__index = self})
     return obj
 end
-function enemy:draw()
+function brownEnemy:draw()
     love.graphics.draw(self.image, self.x, self.y)
 
 end
 function brownEnemy:attack()
     -- Create smoke cloud that deals DoT to player if they are inside it
-    
+    local cloud = smokeCloud:new(self.x + self.width/2, self.y + self.height/2, 1)
 end
 function brownEnemy:update(options)
     player, dt, enemySet = options.player, options.dt, options.enemySet
