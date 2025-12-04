@@ -100,6 +100,7 @@ function love.draw()
 
     -- Draw HUD elements in screen space
     love.graphics.print("Health: " .. player.health, 10, 10)
+    love.graphics.print("XP: " .. player.xp, 10, 30)
     
 end
 
