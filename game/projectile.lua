@@ -14,7 +14,7 @@ function projectileClass:new(options)
     obj.lifetime = options.lifetime or 2 -- seconds
     obj.age = 0
     obj.isExpired = false
-    obj.image = love.graphics.newImage(options.imagePath or "assets/sword.png")
+    obj.imagePath = options.imagePath or "assets/sword.png"
     return obj
 end
 function projectileClass:draw()
