@@ -15,7 +15,7 @@ local function computeCounts(mapW, mapH)
 end
 
 -- Finds a spawn position away from the player and not colliding with map objects.
-local function makeSpawnFinder(map, mapW, mapH, player)
+function gameRun.makeSpawnFinder(map, mapW, mapH, player)
     local minDistanceFromPlayer = 120
     return function()
         local tries = 0
@@ -58,6 +58,9 @@ function gameRun.newRun(state)
     player.y = math.floor(mapH / 2 - (player.height or 0) / 2)
     player.health = player.maxHealth or player.health
 
+    -- Restart game time
+    gameTime = 0
+
     -- clear world objects
     for k in pairs(projectiles) do projectiles[k] = nil end
     for k in pairs(enemySet) do enemySet[k] = nil end
@@ -65,20 +68,13 @@ function gameRun.newRun(state)
     -- generate map
     map.load({ width = mapW, height = mapH, counts = counts, safeZones = { { x = player.x, y = player.y, width = player.width, height = player.height } } })
 
-    -- spawn enemies
-    local findSpawnSafeLocal = makeSpawnFinder(map, mapW, mapH, player)
+    -- spawn initial enemies
+    local findSpawnSafeLocal = gameRun.makeSpawnFinder(map, mapW, mapH, player)
     for i=1,5 do
         local ex, ey = findSpawnSafeLocal()
         table.insert(enemySet, yaleEnemy:new(ex, ey))
     end
-    for i=1,5 do
-        local ex, ey = findSpawnSafeLocal()
-        table.insert(enemySet, brownEnemy:new(ex, ey))
-    end
-    for i=1,5 do
-        local ex, ey = findSpawnSafeLocal()
-        table.insert(enemySet, dartmouthEnemy:new(ex, ey))
-    end
+    
 end
 
 return gameRun

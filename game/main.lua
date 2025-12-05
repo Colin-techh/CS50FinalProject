@@ -58,9 +58,8 @@ function love.load()
     pistol = require("pistol")
     pistol.load()
 
-    -- Enemy types
-    -- yaleEnemy = require("yale")
-    -- brownEnemy = require("brown")
+    -- Start game timer
+    gameTimer = 0
 
     -- UI selection images (reuse assets)
     selectionSwordImage = sprites["sword"]
@@ -81,6 +80,8 @@ function love.load()
     projectiles = {}
     map = require("map")
 
+    -- Spawning enemy setup
+    spawningFunctions = require("spawning")
     -- Player
     player = {
         x = 0,
@@ -204,7 +205,7 @@ function love.draw()
     -- Draw HUD elements in screen space
     love.graphics.print("Health: " .. player.health, 10, 10)
     love.graphics.print("XP: " .. player.xp, 10, 30)
-    love.graphics.print("Projectiles: " .. #projectiles, 10, 50)
+    love.graphics.print("Enemies: " .. #enemySet, 10, 50)
     
     -- Draw upgrade menu overlay when active
     if showUpgradeMenu and upgradeChoices then
@@ -320,6 +321,19 @@ function love.update(dt)
                 end
             end
         end
+
+        -- update game timer
+        gameTimer = gameTimer + dt
+
+        -- spawn enemies
+        spawningFunctions.spawnEnemy({
+            gameTime = math.floor(gameTimer),
+            enemySet = enemySet,
+            yaleEnemy = yaleEnemy,
+            brownEnemy = brownEnemy,
+            dartmouthEnemy = dartmouthEnemy,
+            findSpawnSafe = gameRun.makeSpawnFinder(map, background:getWidth(), background:getHeight(), player)
+        })
     end
 
     -- handle death / reset here so gameplay module doesn't need global state
