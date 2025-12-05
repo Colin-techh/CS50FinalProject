@@ -2,8 +2,8 @@ local enemy = require("enemy")
 cornellEnemy = {}
 setmetatable(cornellEnemy, {__index = enemy})
 function cornellEnemy:new(xx, yy)
-    local obj = enemy:new({x=xx, y=yy, width=84, height=116, speed=20, damage=5, knockback=48, health=12, takesKnockback = false, imagePath="assets/enemy4.png"})
-
+    local obj = enemy:new({x=xx, y=yy, width=84, height=116, speed=20, damage=5, knockback=48, health=12, takesKnockback = false, xp=15, imagePath="assets/enemy4.png"})
+    obj.takesKnockback = false
     setmetatable(obj, {__index = self})
     return obj
 end
@@ -38,7 +38,7 @@ function cornellEnemy:update(options)
     local vX = player.x - self.x
     local vY = player.y - self.y
     local distance = math.sqrt(vX^2 + vY^2)
-    if distance > 100 then
+    if distance > 0 then
         self.x = self.x + (vX / distance) * self.speed * dt
         self.y = self.y + (vY / distance) * self.speed * dt
     end

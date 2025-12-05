@@ -14,14 +14,16 @@ function spawningFunctions.spawnEnemy(options)
         lastTimeSpawned = currentGameTime
         local enemyTypeRoll = math.random()
         local enemyType = nil
-        -- if enemyTypeRoll < 0.5 then
-        --     enemyType = options.yaleEnemy
-        -- elseif enemyTypeRoll < 0.8 then
-        --     enemyType = options.brownEnemy
-        -- else
-        --     enemyType = options.dartmouthEnemy
-        -- end
-        enemyType = options.cornellEnemy
+        if enemyTypeRoll < 0.5 then
+            enemyType = options.yaleEnemy
+        elseif enemyTypeRoll < 0.8 then
+            enemyType = options.brownEnemy
+        elseif enemyTypeRoll <= 0.9 then
+            enemyType = options.dartmouthEnemy
+        else 
+            enemyType = options.cornellEnemy
+        end
+        
 
         local ex, ey = options.findSpawnSafe()
         local newEnemy = enemyType:new(ex, ey)
