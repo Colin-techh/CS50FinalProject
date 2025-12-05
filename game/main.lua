@@ -35,6 +35,7 @@ function love.load()
     isClicking = require("isClicking")
     isAtTitleScreen = true
     isChoosingWeapon = false
+    isPaused = false
     selectedWeapon = nil -- "sword" | "boomerang" | "pistol"
     weaponSelectionBuffer = 0
     -- Press play
@@ -44,6 +45,20 @@ function love.load()
         y = height/2 - startImage:getHeight()/8,
         width = startImage:getWidth()/4,
         height = startImage:getHeight()/4
+    }
+    
+    -- Pause menu buttons
+    pauseNewGameButton = {
+        x = width/2 - 100,
+        y = height/2 - 20,
+        width = 200,
+        height = 50
+    }
+    pauseQuitButton = {
+        x = width/2 - 100,
+        y = height/2 + 50,
+        width = 200,
+        height = 50
     }
 
     -- player image
@@ -125,6 +140,9 @@ end
 
 -- start a fresh run: regenerate map, reset enemies/projectiles, center player and spawn enemies
 function newGame()
+    -- Reset game timer
+    gameTimer = 0
+    
     gameRun.newRun({
         background = background,
         map = map,
@@ -210,9 +228,103 @@ function love.draw()
     love.graphics.print("XP: " .. player.xp, 10, 30)
     love.graphics.print("Enemies: " .. #enemySet, 10, 50)
     
+    -- Draw game timer at top center
+    local minutes = math.floor(gameTimer / 60)
+    local seconds = math.floor(gameTimer % 60)
+    local timerText = string.format("%02d:%02d", minutes, seconds)
+    local font = love.graphics.getFont()
+    local timerFont = love.graphics.newFont(32)
+    love.graphics.setFont(timerFont)
+    local timerWidth = timerFont:getWidth(timerText)
+    love.graphics.print(timerText, width/2 - timerWidth/2, 10)
+    love.graphics.setFont(font)
+    
     -- Draw upgrade menu overlay when active
     if showUpgradeMenu and upgradeChoices then
         upgradeChoiceRects = uiUpgradeMenu.draw(width, height, upgradeChoices)
+    end
+    
+    -- Draw pause menu overlay when active
+    if isPaused then
+        -- Semi-transparent dark overlay
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle("fill", 0, 0, width, height)
+        love.graphics.setColor(1, 1, 1, 1)
+        
+        -- "Game Paused" title
+        local titleFont = love.graphics.newFont(48)
+        love.graphics.setFont(titleFont)
+        local pauseText = "Game Paused"
+        local pauseWidth = titleFont:getWidth(pauseText)
+        love.graphics.print(pauseText, width/2 - pauseWidth/2, height/2 - 120)
+        
+        -- Stats table on the left
+        love.graphics.setFont(font)
+        local statsFont = love.graphics.newFont(18)
+        love.graphics.setFont(statsFont)
+        local statsX = 50
+        local statsY = height/2 - 150
+        local lineHeight = 25
+        
+        -- Stats title
+        love.graphics.setColor(1, 1, 0.5, 1)
+        love.graphics.print("Player Stats:", statsX, statsY)
+        love.graphics.setColor(1, 1, 1, 1)
+        statsY = statsY + lineHeight + 5
+        
+        -- Calculate actual damage based on selected weapon
+        local weaponBaseDamage = 0
+        if selectedWeapon == "sword" then
+            weaponBaseDamage = 1
+        elseif selectedWeapon == "boomerang" then
+            weaponBaseDamage = 2
+        elseif selectedWeapon == "pistol" then
+            weaponBaseDamage = 2
+        end
+        local totalDamage = weaponBaseDamage + (player.damage or 0)
+        
+        -- Display upgrade stats
+        local stats = {
+            {"Max Health", player.maxHealth or 3},
+            {"Damage", totalDamage},
+            {"Speed", math.floor((player.speed or 100))},
+            {"XP Multiplier", string.format("%.2fx", player.xpMultiplier or 1)},
+            {"Crit Chance", string.format("%.0f%%", (player.criticalHitChance or 0) * 100)},
+            {"Lifesteal", string.format("%.0f%%", (player.lifesteal or 0) * 100)},
+            {"Health Regen", (player.healthRegen or 0) .. " HP/10s"},
+            {"Extra Projectiles", player.extraProjectiles or 0},
+            {"Knockback Resist", string.format("%.0f%%", (player.knockbackResist or 0) * 100)},
+            {"Invuln Duration", string.format("%.2fs", player.invulnDuration or 1)}
+        }
+        
+        for _, stat in ipairs(stats) do
+            love.graphics.print(stat[1] .. ": " .. stat[2], statsX, statsY)
+            statsY = statsY + lineHeight
+        end
+        
+        -- New Game button
+        love.graphics.setFont(font)
+        love.graphics.setColor(0.3, 0.3, 0.3, 1)
+        love.graphics.rectangle("fill", pauseNewGameButton.x, pauseNewGameButton.y, pauseNewGameButton.width, pauseNewGameButton.height)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.rectangle("line", pauseNewGameButton.x, pauseNewGameButton.y, pauseNewGameButton.width, pauseNewGameButton.height)
+        local buttonFont = love.graphics.newFont(24)
+        love.graphics.setFont(buttonFont)
+        local newGameText = "New Game"
+        local newGameWidth = buttonFont:getWidth(newGameText)
+        love.graphics.print(newGameText, pauseNewGameButton.x + pauseNewGameButton.width/2 - newGameWidth/2, pauseNewGameButton.y + 12)
+        
+        -- Quit button
+        love.graphics.setColor(0.3, 0.3, 0.3, 1)
+        love.graphics.rectangle("fill", pauseQuitButton.x, pauseQuitButton.y, pauseQuitButton.width, pauseQuitButton.height)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.rectangle("line", pauseQuitButton.x, pauseQuitButton.y, pauseQuitButton.width, pauseQuitButton.height)
+        local quitText = "Quit"
+        local quitWidth = buttonFont:getWidth(quitText)
+        love.graphics.print(quitText, pauseQuitButton.x + pauseQuitButton.width/2 - quitWidth/2, pauseQuitButton.y + 12)
+        
+        love.graphics.setFont(font)
+        love.graphics.setColor(1, 1, 1, 1)
     end
 end
 
@@ -244,6 +356,11 @@ function love.keypressed(key)
                 return
             end
     end
+    
+    -- Toggle pause with Escape key
+    if key == "escape" and not isAtTitleScreen and not isChoosingWeapon and not showUpgradeMenu then
+        isPaused = not isPaused
+    end
 end
 
 function love.update(dt)
@@ -257,6 +374,22 @@ function love.update(dt)
     end
 
     if isAtTitleScreen then
+        return
+    end
+    
+    -- Handle pause menu clicks
+    if isPaused then
+        if isClicking(pauseNewGameButton) then
+            isPaused = false
+            isAtTitleScreen = false
+            isChoosingWeapon = true
+            selectedWeapon = nil
+            weaponSelectionBuffer = 1.0
+            weaponChoices, weaponChoiceRects = uiWeaponSelection.buildChoices(width, height, selectionSwordImage, selectionBoomerangImage, selectionPistolImage)
+        end
+        if isClicking(pauseQuitButton) then
+            love.event.quit()
+        end
         return
     end
 
@@ -280,7 +413,7 @@ function love.update(dt)
     end
 
     -- If upgrade menu is open, freeze the world (no camera movement, enemies, projectiles, or player updates)
-    if not showUpgradeMenu then
+    if not showUpgradeMenu and not isPaused then
         camera:lookAt(player.x, player.y)
         
         -- update health regeneration

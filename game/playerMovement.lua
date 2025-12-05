@@ -24,16 +24,20 @@ function update(player, key_mappings, dt)
     local dy = input.y * (player.speed or 0) * dt
     -- try horizontal move
     if dx ~= 0 then
-        local testBox = { x = player.x + dx, y = player.y, width = player.width or 0, height = player.height or 0 }
-        if not map:collidesWithBlocking(testBox) then
-            player.x = player.x + dx
+        local newX = player.x + dx
+        local testBox = { x = newX, y = player.y, width = player.width or 0, height = player.height or 0 }
+        -- check map collision and boundary (0 to 5000)
+        if not map:collidesWithBlocking(testBox) and newX >= 0 and newX + (player.width or 0) <= 5000 then
+            player.x = newX
         end
     end
     -- try vertical move
     if dy ~= 0 then
-        local testBox = { x = player.x, y = player.y + dy, width = player.width or 0, height = player.height or 0 }
-        if not map:collidesWithBlocking(testBox) then
-            player.y = player.y + dy
+        local newY = player.y + dy
+        local testBox = { x = player.x, y = newY, width = player.width or 0, height = player.height or 0 }
+        -- check map collision and boundary (0 to 5000)
+        if not map:collidesWithBlocking(testBox) and newY >= 0 and newY + (player.height or 0) <= 5000 then
+            player.y = newY
         end
     end
 
