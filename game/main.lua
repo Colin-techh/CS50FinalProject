@@ -1,3 +1,5 @@
+-- CS50 Final Project: "Yuck Fale" by Levi and Colin
+
 -- Library usage
 local Camera = require "libs.hump-master.camera"
 local gameRun = require("gameRun")
