@@ -65,11 +65,11 @@ function love.load()
     pauseQuitButton = pauseButtons.quit
 
     -- Weapons
-    sword = require("sword")
+    sword = require("weapons/sword")
     sword.load()
-    boomerang = require("boomerang")
+    boomerang = require("weapons/boomerang")
     boomerang.load()
-    pistol = require("pistol")
+    pistol = require("weapons/pistol")
     pistol.load()
 
     -- Key mappings
@@ -81,10 +81,10 @@ function love.load()
     }
     
     -- Enemies
-    require("yale")
-    require("brown")
-    require("dartmouth")
-    require("cornell")
+    require("mobs/yale")
+    require("mobs/brown")
+    require("mobs/dartmouth")
+    require("mobs/cornell")
     map = require("map")
     spawningFunctions = require("spawning")
     
