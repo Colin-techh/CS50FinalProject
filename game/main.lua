@@ -134,7 +134,7 @@ function love.draw()
     })
 
     -- Draw HUD
-    uiHud.drawBasic(player, #enemySet)
+    uiHud.drawBasic(player)
     uiHud.drawTimer(gameTimer, width)
     
     -- Draw upgrade menu overlay
