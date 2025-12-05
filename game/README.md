@@ -1,0 +1,1 @@
+This project is a LOVE2D game built using Lua. It is a game where you play as a Harvard student fighting of waves of other Ivy League students. To run this game, 
