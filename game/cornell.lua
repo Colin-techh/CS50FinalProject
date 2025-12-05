@@ -2,8 +2,8 @@ local enemy = require("enemy")
 cornellEnemy = {}
 setmetatable(cornellEnemy, {__index = enemy})
 function cornellEnemy:new(xx, yy)
-    local obj = enemy:new({x=xx, y=yy, width=84, height=116, speed=20, damage=5, knockback=48, health=12, takesKnockback = false, imagePath="assets/enemy4.png"})
-
+    local obj = enemy:new({x=xx, y=yy, width=84, height=116, speed=20, damage=5, knockback=48, health=12, takesKnockback = false, xp=15, imagePath="assets/enemy4.png"})
+    obj.takesKnockback = false
     setmetatable(obj, {__index = self})
     return obj
 end

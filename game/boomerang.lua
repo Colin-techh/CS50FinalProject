@@ -175,9 +175,9 @@ function Boomerang.update(player, enemySet, dt)
                     if player.lifesteal and player.lifesteal > 0 then
                         player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
                     end
-                    
+
                     -- knockback for enemies that support it
-                    if enemy.takesKnockback then
+                    if enemy.takesKnockback==true then
                         local ex = (enemy.x or 0) + (enemy.width or 0)/2
                         local ey = (enemy.y or 0) + (enemy.height or 0)/2
                         local kdx = ex - bState.x

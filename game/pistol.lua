@@ -83,15 +83,17 @@ local function spawnBullet(px, py, vx, vy, player)
                     end
                     
                     -- simple knockback
-                    local ex = (enemy.x or 0) + (enemy.width or 0)/2
-                    local ey = (enemy.y or 0) + (enemy.height or 0)/2
-                    local dx = ex - self.x
-                    local dy = ey - self.y
-                    local dist = math.sqrt(dx*dx + dy*dy)
-                    if dist == 0 then dist = 0.0001 end
-                    local kb = enemy.knockback or 20
-                    enemy.x = enemy.x + (dx / dist) * kb
-                    enemy.y = enemy.y + (dy / dist) * kb
+                    if enemy.takesKnockback == true then
+                        local ex = (enemy.x or 0) + (enemy.width or 0)/2
+                        local ey = (enemy.y or 0) + (enemy.height or 0)/2
+                        local dx = ex - self.x
+                        local dy = ey - self.y
+                        local dist = math.sqrt(dx*dx + dy*dy)
+                        if dist == 0 then dist = 0.0001 end
+                        local kb = enemy.knockback or 20
+                        enemy.x = enemy.x + (dx / dist) * kb
+                        enemy.y = enemy.y + (dy / dist) * kb
+                    end
                     self.isExpired = true
                 end
             end
