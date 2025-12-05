@@ -473,8 +473,7 @@ function love.update(dt)
         })
     end
 
-    -- handle death / reset here so gameplay module doesn't need global state
-    
+    player:update()
 
     -- handle upgrade menu input (click to choose)
     if showUpgradeMenu and upgradeChoiceRects and upgradeChoices then
