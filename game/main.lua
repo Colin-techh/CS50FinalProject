@@ -119,6 +119,7 @@ function love.draw()
     -- Draw HUD elements in screen space
     love.graphics.print("Health: " .. player.health, 10, 10)
     love.graphics.print("XP: " .. player.xp, 10, 30)
+    love.graphics.print("Projectiles: " .. #projectiles, 10, 50)
     
 end
 
@@ -154,9 +155,9 @@ function love.update(dt)
         end
     end
 
-    for index, projectile in pairs(projectiles) do
-        projectile:update(dt)
-        if projectile.isExpired then
+    for index, proj in pairs(projectiles) do
+        proj:update(dt)
+        if proj.isExpired then
             table.remove(projectiles, index)
         end
     end
