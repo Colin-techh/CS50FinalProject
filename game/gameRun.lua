@@ -49,7 +49,7 @@ function gameRun.newRun(state)
     local projectiles = state.projectiles
     local yaleEnemy = state.yaleEnemy
     local brownEnemy = state.brownEnemy
-
+    local dartmouthEnemy = state.dartmouthEnemy
     local mapW, mapH = background:getWidth(), background:getHeight()
     local counts = computeCounts(mapW, mapH)
 

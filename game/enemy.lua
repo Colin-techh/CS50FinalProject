@@ -1,4 +1,5 @@
 enemy = {}
+
 function enemy:new(options)
     local xx, yy, width, height, speed, damage, knockback, health, imagePath = options.x, options.y, options.width, options.height, options.speed, options.damage, options.knockback, options.health, options.imagePath
     local obj = {
@@ -13,8 +14,8 @@ function enemy:new(options)
         xp = options.xp or 5,
         image = love.graphics.newImage(imagePath or "assets/enemy1.png")
     }
-    obj.__index = self
-    setmetatable(obj, {__index = self})
+    -- obj.__index = self
+    setmetatable(obj, {__index = enemy})
     return obj
 end
 function enemy:draw()

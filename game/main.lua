@@ -59,8 +59,8 @@ function love.load()
     pistol.load()
 
     -- Enemy types
-    yaleEnemy = require("yale")
-    brownEnemy = require("brown")
+    -- yaleEnemy = require("yale")
+    -- brownEnemy = require("brown")
 
     -- UI selection images (reuse assets)
     selectionSwordImage = sprites["sword"]
@@ -131,11 +131,13 @@ function newGame()
         enemySet = enemySet,
         projectiles = projectiles,
         yaleEnemy = yaleEnemy,
-        brownEnemy = brownEnemy
+        brownEnemy = brownEnemy,
+        dartmouthEnemy = dartmouthEnemy
     })
 end
 
 function love.draw()
+
     if isAtTitleScreen then
         -- Draw play button
         love.graphics.setBlendMode("alpha")
@@ -292,7 +294,6 @@ function love.update(dt)
         for index, enemy in pairs(enemySet) do
             require("handleDamage")({player = player, enemy = enemy})
         end
-
         -- enemy AI update and death handling
         for index = #enemySet, 1, -1 do
             local enemy = enemySet[index]

@@ -1,10 +1,11 @@
-enemy = require("enemy")
+local enemy = require("enemy")
 dartmouthEnemy = {}
+setmetatable(dartmouthEnemy, {__index = enemy})
 function dartmouthEnemy:new(xx, yy)
     local obj = enemy:new({x=xx, y=yy, width=22, height=28, speed=60, damage=2, knockback=64, health=10, imagePath="assets/enemy3.png"})
     obj.wobble = math.random() * 5
-    setmetatable(self, {__index = enemy})
-    setmetatable(obj, {__index = self})
+    
+    setmetatable(obj, {__index = dartmouthEnemy})
     return obj
 end
 function dartmouthEnemy:attack()
