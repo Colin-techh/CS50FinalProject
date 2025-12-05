@@ -14,7 +14,7 @@ end
 -- Draw title screen
 function ui_titleScreen.draw(width, height, startImage, player, background)
     local originalFont = love.graphics.getFont()
-
+    -- Draw start button, should start game on click
     love.graphics.setBlendMode("alpha")
     love.graphics.draw(startImage, width/2 - startImage:getWidth()/8, height/2 - startImage:getHeight()/8, 0, 0.25, 0.25)
 

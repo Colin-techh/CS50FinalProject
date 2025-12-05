@@ -1,8 +1,9 @@
 -- Module for HUD (Heads-Up Display) elements
 local ui_hud = {}
 
--- Draw basic HUD info (health, XP, enemy count)
-function ui_hud.drawBasic(player, enemyCount)
+-- Draw basic HUD info (health, XP, player level)
+function ui_hud.drawBasic(player)
+    -- Need a pretty box for our info :)
     love.graphics.setColor(0, 0, 0, 0.6)
     love.graphics.rectangle("fill", 5, 5, 120, 70)
 
@@ -16,7 +17,7 @@ function ui_hud.drawBasic(player, enemyCount)
     love.graphics.setColor(1, 1, 1)
 end
 
--- Draw game timer at top center
+-- Draw game timer at top center, this is what enemy scaling is based on
 function ui_hud.drawTimer(gameTimer, width)
     local minutes = math.floor(gameTimer / 60)
     local seconds = math.floor(gameTimer % 60)

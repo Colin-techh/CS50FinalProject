@@ -24,7 +24,7 @@ function spawningFunctions.spawnEnemy(options)
             enemyType = options.cornellEnemy
         end
         
-
+        -- spawn at a safe location
         local ex, ey = options.findSpawnSafe()
         local newEnemy = enemyType:new(ex, ey)
 
