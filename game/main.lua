@@ -188,7 +188,10 @@ function love.draw()
         enemy:draw()
     end
     for index, projectile in pairs(projectiles) do
-        projectile:draw()
+        -- skip extra boomerang objects (they're drawn in boomerang.draw)
+        if not projectile.isExtraProjectile then
+            projectile:draw()
+        end
     end
     -- draw selected weapon visuals
     if selectedWeapon == "sword" then
@@ -324,9 +327,12 @@ function love.update(dt)
         for index = #projectiles, 1, -1 do
             local projectile = projectiles[index]
             if projectile then
-                projectile:update({dt=dt, player=player})
-                if projectile.isExpired then
-                    table.remove(projectiles, index)
+                -- skip extra boomerang objects (they're handled in boomerang.update)
+                if not projectile.isExtraProjectile then
+                    projectile:update({dt=dt, player=player})
+                    if projectile.isExpired then
+                        table.remove(projectiles, index)
+                    end
                 end
             end
         end

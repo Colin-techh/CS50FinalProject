@@ -69,6 +69,43 @@ local function launchTowards(player, target)
     state.hitEnemies = {}
 end
 
+-- Create and launch an extra boomerang for multi-projectile upgrade
+local function launchExtraBoomerang(player, target, angleOffset)
+    local px = player.x + (player.width or 0)/2
+    local py = player.y + (player.height or 0)/2
+    local tx, ty
+    if target then
+        tx = (target.x or 0) + (target.width or 0)/2
+        ty = (target.y or 0) + (target.height or 0)/2
+    else
+        if player.facing == "right" then tx, ty = px + 1, py
+        elseif player.facing == "left" then tx, ty = px - 1, py
+        elseif player.facing == "up" then tx, ty = px, py - 1
+        else tx, ty = px, py + 1 end
+    end
+    local dx = tx - px
+    local dy = ty - py
+    local baseAngle = math.atan2(dy, dx)
+    local angle = baseAngle + angleOffset
+    local vx = math.cos(angle) * speed
+    local vy = math.sin(angle) * speed
+    
+    -- Create a new boomerang state object for this extra projectile
+    local extraState = {
+        mode = "out",
+        x = px,
+        y = py,
+        vx = vx,
+        vy = vy,
+        angle = 0,
+        dist = 0,
+        hitEnemies = {},
+        isExtraProjectile = true,
+        drawScale = state.drawScale or 1
+    }
+    table.insert(projectiles, extraState)
+end
+
 function Boomerang.update(player, enemySet, dt)
     -- attach to player when idle
     local px = player.x + (player.width or 0)/2
@@ -89,94 +126,124 @@ function Boomerang.update(player, enemySet, dt)
             local target = projectile.findClosestEnemy(player, enemySet)
             if target then
                 launchTowards(player, target)
+                
+                -- spawn extra boomerangs if upgrade active
+                local extraCount = player.extraProjectiles or 0
+                if extraCount > 0 then
+                    local angleOffset = math.pi / 6 -- 30 degrees between projectiles
+                    for i = 1, extraCount do
+                        launchExtraBoomerang(player, target, angleOffset * i)
+                    end
+                end
+                
                 state.cooldownTimer = 0
             end
         end
         return
     end
 
-    -- move
-    state.x = state.x + (state.vx or 0) * dt
-    state.y = state.y + (state.vy or 0) * dt
-    state.angle = state.angle + spinSpeed * dt
+    -- Helper function to update a boomerang state object
+    local function updateBoomerangState(bState)
+        -- move
+        bState.x = bState.x + (bState.vx or 0) * dt
+        bState.y = bState.y + (bState.vy or 0) * dt
+        bState.angle = bState.angle + spinSpeed * dt
 
-    -- check for hitting enemies while flying (both out and return)
-    if state.mode ~= "idle" and enemySet then
-        local iw = (image and image:getWidth() or size) * (state.drawScale or 1)
-        local ih = (image and image:getHeight() or size) * (state.drawScale or 1)
-        local w = iw * hitSizeMultiplier
-        local h = ih * hitSizeMultiplier
-        local attackBox = { x = state.x - w/2, y = state.y - h/2, width = w, height = h }
-        local isColliding = require("collisions")
-        for _, enemy in pairs(enemySet) do
-            if enemy and not state.hitEnemies[enemy] and isColliding(state, enemy) then
-                -- calculate damage with critical hit chance
-                local baseDamage = 2 + (player.damage or 0)
-                local critChance = player.criticalHitChance or 0
-                local isCritical = math.random() < critChance
-                local damageDealt = isCritical and (baseDamage * 2) or baseDamage
-                
-                if enemy.decreaseHealth then
-                    enemy:decreaseHealth(damageDealt)
+        -- check for hitting enemies while flying (both out and return)
+        if bState.mode ~= "idle" and enemySet then
+            local iw = (image and image:getWidth() or size) * (bState.drawScale or 1)
+            local ih = (image and image:getHeight() or size) * (bState.drawScale or 1)
+            local w = iw * hitSizeMultiplier
+            local h = ih * hitSizeMultiplier
+            local attackBox = { x = bState.x - w/2, y = bState.y - h/2, width = w, height = h }
+            local isColliding = require("collisions")
+            for _, enemy in pairs(enemySet) do
+                if enemy and not bState.hitEnemies[enemy] and isColliding(attackBox, enemy) then
+                    -- calculate damage with critical hit chance
+                    local baseDamage = 2 + (player.damage or 0)
+                    local critChance = player.criticalHitChance or 0
+                    local isCritical = math.random() < critChance
+                    local damageDealt = isCritical and (baseDamage * 2) or baseDamage
+                    
+                    if enemy.decreaseHealth then
+                        enemy:decreaseHealth(damageDealt)
+                    else
+                        enemy.health = (enemy.health or 0) - damageDealt
+                    end
+                    
+                    -- apply lifesteal
+                    if player.lifesteal and player.lifesteal > 0 then
+                        player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
+                    end
+                    -- knockback
+                    local ex = (enemy.x or 0) + (enemy.width or 0)/2
+                    local ey = (enemy.y or 0) + (enemy.height or 0)/2
+                    local kdx = ex - bState.x
+                    local kdy = ey - bState.y
+                    local dist = math.sqrt(kdx*kdx + kdy*kdy)
+                    if dist == 0 then dist = 0.0001 end
+                    local kb = enemy.knockback or 20
+                    enemy.x = enemy.x + (kdx / dist) * kb
+                    enemy.y = enemy.y + (kdy / dist) * kb
+                    bState.hitEnemies[enemy] = true
+                end
+            end
+        end
+
+        if bState.mode == "out" then
+            -- accumulate distance traveled from player origin
+            local dx = bState.x - px
+            local dy = bState.y - py
+            bState.dist = math.sqrt(dx*dx + dy*dy)
+
+            if bState.dist >= range then
+                -- start return; reset hit list so return can hit enemies again
+                bState.hitEnemies = {}
+                local rdx = px - bState.x
+                local rdy = py - bState.y
+                local rd = math.sqrt(rdx*rdx + rdy*rdy)
+                if rd == 0 then rd = 0.0001 end
+                bState.vx = (rdx / rd) * returnSpeed
+                bState.vy = (rdy / rd) * returnSpeed
+                bState.mode = "return"
+            end
+        elseif bState.mode == "return" then
+            -- recompute return velocity each frame so boomerang tracks moving player
+            local rdx = px - bState.x
+            local rdy = py - bState.y
+            local rd = math.sqrt(rdx*rdx + rdy*rdy)
+            if rd == 0 then rd = 0.0001 end
+            bState.vx = (rdx / rd) * returnSpeed
+            bState.vy = (rdy / rd) * returnSpeed
+
+            -- check arrival
+            if rd <= 16 then
+                -- reached player; mark as expired for extra boomerangs or return to idle for main
+                if bState.isExtraProjectile then
+                    bState.isExpired = true
                 else
-                    enemy.health = (enemy.health or 0) - damageDealt
+                    bState.mode = "idle"
+                    bState.vx, bState.vy = 0, 0
+                    bState.angle = 0
+                    bState.cooldownTimer = waitAfterReturn
+                    bState.x = px
+                    bState.y = py
                 end
-                
-                -- apply lifesteal
-                if player.lifesteal and player.lifesteal > 0 then
-                    player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
-                end
-                -- knockback
-                local ex = (enemy.x or 0) + (enemy.width or 0)/2
-                local ey = (enemy.y or 0) + (enemy.height or 0)/2
-                local kdx = ex - state.x
-                local kdy = ey - state.y
-                local dist = math.sqrt(kdx*kdx + kdy*kdy)
-                if dist == 0 then dist = 0.0001 end
-                local kb = enemy.knockback or 20
-                enemy.x = enemy.x + (kdx / dist) * kb
-                enemy.y = enemy.y + (kdy / dist) * kb
-                state.hitEnemies[enemy] = true
             end
         end
     end
 
-    if state.mode == "out" then
-        -- accumulate distance traveled from player origin
-        local dx = state.x - px
-        local dy = state.y - py
-        state.dist = math.sqrt(dx*dx + dy*dy)
-
-        if state.dist >= range then
-            -- start return; reset hit list so return can hit enemies again
-            state.hitEnemies = {}
-            local rdx = px - state.x
-            local rdy = py - state.y
-            local rd = math.sqrt(rdx*rdx + rdy*rdy)
-            if rd == 0 then rd = 0.0001 end
-            state.vx = (rdx / rd) * returnSpeed
-            state.vy = (rdy / rd) * returnSpeed
-            state.mode = "return"
-        end
-    elseif state.mode == "return" then
-        -- recompute return velocity each frame so boomerang tracks moving player
-        local rdx = px - state.x
-        local rdy = py - state.y
-        local rd = math.sqrt(rdx*rdx + rdy*rdy)
-        if rd == 0 then rd = 0.0001 end
-        state.vx = (rdx / rd) * returnSpeed
-        state.vy = (rdy / rd) * returnSpeed
-
-        -- check arrival
-        if rd <= 16 then
-            -- reached player; become idle and start cooldown before next launch
-            state.mode = "idle"
-            state.vx, state.vy = 0, 0
-            state.angle = 0
-            state.cooldownTimer = waitAfterReturn
-            -- place boomerang exactly at player's center
-            state.x = px
-            state.y = py
+    -- Update main boomerang
+    updateBoomerangState(state)
+    
+    -- Update extra boomerangs in projectiles table
+    for i = #projectiles, 1, -1 do
+        local proj = projectiles[i]
+        if proj and proj.isExtraProjectile then
+            updateBoomerangState(proj)
+            if proj.isExpired then
+                table.remove(projectiles, i)
+            end
         end
     end
 end
@@ -212,6 +279,21 @@ function Boomerang.draw(player, enemySet)
         love.graphics.setColor(1,1,0)
         love.graphics.circle("fill", state.x, state.y, size/2)
         love.graphics.setColor(1,1,1)
+    end
+    
+    -- draw extra boomerangs
+    for _, proj in pairs(projectiles) do
+        if proj and proj.isExtraProjectile then
+            if image then
+                local iw, ih = image:getWidth(), image:getHeight()
+                local scale = proj.drawScale or 1
+                love.graphics.draw(image, proj.x, proj.y, proj.angle, scale, scale, iw/2, ih/2)
+            else
+                love.graphics.setColor(1,1,0)
+                love.graphics.circle("fill", proj.x, proj.y, size/2)
+                love.graphics.setColor(1,1,1)
+            end
+        end
     end
 end
 
