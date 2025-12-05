@@ -19,7 +19,7 @@ local HITBOX_SCALE = 0.25
 local function newObj(imgPath, x, y, w, h, typ, blocking)
     local obj = { x = x, y = y, width = w, height = h, type = typ, blocking = blocking }
     if imgPath and love.filesystem.getInfo(imgPath) then
-        obj.image = love.graphics.newImage(imgPath)
+        obj.image = sprites[typ]
     else
         obj.image = nil
     end

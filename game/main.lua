@@ -24,7 +24,10 @@ function love.load()
         enemy1 = love.graphics.newImage("assets/enemy1.png"),
         enemy2 = love.graphics.newImage("assets/enemy2.png"),
         enemy3 = love.graphics.newImage("assets/enemy3.png"),
-        pistol_bullet = love.graphics.newImage("assets/pistol_bullet.png")
+        pistol_bullet = love.graphics.newImage("assets/pistol_bullet.png"),
+        tree = love.graphics.newImage("assets/tree.png"),
+        rock = love.graphics.newImage("assets/rock.png"),
+        grass = love.graphics.newImage("assets/grass.png")
     }
 
 
