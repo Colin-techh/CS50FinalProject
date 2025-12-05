@@ -1,5 +1,8 @@
 -- Library usage
 local Camera = require "libs.hump-master.camera"
+local gameRun = require("gameRun")
+local uiWeaponSelection = require("ui_weaponSelection")
+local uiUpgradeMenu = require("ui_upgradeMenu")
 
 camera = Camera(0, 0)
 
@@ -36,6 +39,10 @@ function love.load()
     pistol = require("pistol")
     pistol.load()
 
+    -- Enemy types
+    yaleEnemy = require("yale")
+    brownEnemy = require("brown")
+
     -- UI selection images (reuse assets)
     selectionSwordImage = love.graphics.newImage("assets/sword.png")
     selectionBoomerangImage = love.graphics.newImage("assets/boomerang.png")
@@ -47,23 +54,14 @@ function love.load()
         down  = {"s", "down"},
         right = {"d", "right"},
     }
-    -- Enemy setup
-    require("yale")
-    require("brown")
-
-
     enemySet = {}
+    projectiles = {}
+    map = require("map")
 
-    -- spawn enemies avoiding blocking obstacles and player start area
-    -- (the real findSpawnSafe is declared after we load the map and compute map dimensions)
-
-    -- (map will be loaded after player creation so player's start area can be passed as a safe zone)
     -- Player
-    -- start the player centered in the background world
-    local bgW, bgH = background:getWidth(), background:getHeight()
-    player = { 
-        x = math.floor(bgW / 2 - 32 / 2),
-        y = math.floor(bgH / 2 - 32 / 2),
+    player = {
+        x = 0,
+        y = 0,
         speed = 100,
         width = 32,
         height = 32,
@@ -77,61 +75,25 @@ function love.load()
         knockbackResist = 0,
         isInvulnerable = false,
         invulnTimer = 0,
-                invulnDuration = 1.0,
-                facing = "down",
-                lastHorizontalFacing = "right"
+        invulnDuration = 1.0,
+        facing = "down",
+        lastHorizontalFacing = "right"
     }
 
     -- helper methods on player
     function player:addXP(amount)
         amount = (amount or 0) * (self.xpMultiplier or 1)
         self.xp = (self.xp or 0) + amount
-        -- level up while accumulated XP meets or exceeds the next threshold
         while self.xp >= (self.xpToNext or 10) do
             self:levelUp()
         end
     end
     function player:levelUp()
         self.level = (self.level or 1) + 1
-        -- cumulative threshold: level * 10 XP to reach that level
         self.xpToNext = (self.level) * 10
-        -- show upgrade menu
         upgrades = require("upgrades")
         upgradeChoices = upgrades.getRandomChoices(3, self.level)
         showUpgradeMenu = true
-    end
-
-    -- Projectiles
-    projectiles = {}
-    map = require("map")
-    -- seed randomness per run so maps differ between starts
-    math.randomseed(os.time())
-    math.random() -- warm-up
-    -- convenience: compute world dimensions from background image
-    local mapW, mapH = background:getWidth(), background:getHeight()
-    -- scale counts for very large worlds so objects remain sparse by default
-    local baseArea = 800 * 600
-    local areaRatio = (mapW * mapH) / baseArea
-    local scaleFactor = 0.60 -- higher density (about 3× previous 0.20)
-    local counts = {
-        trees = math.max(2, math.floor(4 * areaRatio * scaleFactor)),
-        rocks = math.max(2, math.floor(3 * areaRatio * scaleFactor)),
-        grass = math.max(8, math.floor(12 * areaRatio * scaleFactor)),
-    }
-    -- helper to spawn enemies safely (uses the current mapW/mapH in scope)
-    local function findSpawnSafe()
-        local tries = 0
-        while tries < 500 do
-            tries = tries + 1
-                local x = math.random(0, mapW)
-                local y = math.random(0, mapH)
-            local box = { x = x, y = y, width = 32, height = 32 }
-            -- avoid player starting area (guaranteed safe zone)
-            if not map:collidesWithBlocking(box) and not map:overlapsAny(box) then
-                return x, y
-            end
-        end
-        return math.random(0, mapW), math.random(0, mapH)
     end
 
     -- initial world created when the player actually starts a run (newGame)
@@ -139,65 +101,15 @@ end
 
 -- start a fresh run: regenerate map, reset enemies/projectiles, center player and spawn enemies
 function newGame()
-    -- reseed randomness for this run
-    math.randomseed(os.time())
-    math.random()
-
-    -- world dims
-    local mapW, mapH = background:getWidth(), background:getHeight()
-    local baseArea = 800 * 600
-    local areaRatio = (mapW * mapH) / baseArea
-    local scaleFactor = 0.60 -- matches the density we compute above
-    local counts = {
-        trees = math.max(2, math.floor(4 * areaRatio * scaleFactor)),
-        rocks = math.max(2, math.floor(3 * areaRatio * scaleFactor)),
-        grass = math.max(8, math.floor(12 * areaRatio * scaleFactor)),
-    }
-
-    -- ensure player is centered and healthy when a new run begins
-    player.x = math.floor(mapW / 2 - (player.width or 0) / 2)
-    player.y = math.floor(mapH / 2 - (player.height or 0) / 2)
-    player.health = player.maxHealth or player.health
-
-    -- clear existing world objects
-    projectiles = {}
-    enemySet = {}
-
-    -- generate the map for the full world and reserve the player's starting cell
-    map.load({ width = mapW, height = mapH, counts = counts, safeZones = { { x = player.x, y = player.y, width = player.width, height = player.height } } })
-
-    -- spawn enemies in the new world
-    local function findSpawnSafeLocal()
-        local tries = 0
-        local minDistanceFromPlayer = 120
-        while tries < 500 do
-            tries = tries + 1
-            local x = math.random(0, mapW)
-            local y = math.random(0, mapH)
-            local box = { x = x, y = y, width = 32, height = 32 }
-            if not map:collidesWithBlocking(box) and not map:overlapsAny(box) then
-                local dx = (player.x + player.width/2) - (x + box.width/2)
-                local dy = (player.y + player.height/2) - (y + box.height/2)
-                local dist = math.sqrt(dx*dx + dy*dy)
-                if dist > minDistanceFromPlayer then
-                    return x, y
-                end
-            end
-        end
-        -- fallback: center of map (guaranteed to exist) if no safe spot found
-        return math.floor(mapW/2), math.floor(mapH/2)
-    end
-
-    for i=1,5 do
-        local ex, ey = findSpawnSafeLocal()
-        local enemy = yaleEnemy:new(ex, ey)
-        addEnemy(enemy)
-    end
-    for i=1,5 do
-        local ex, ey = findSpawnSafeLocal()
-        local enemy = brownEnemy:new(ex, ey)
-        addEnemy(enemy)
-    end
+    gameRun.newRun({
+        background = background,
+        map = map,
+        player = player,
+        enemySet = enemySet,
+        projectiles = projectiles,
+        yaleEnemy = yaleEnemy,
+        brownEnemy = brownEnemy
+    })
 end
 
 function love.draw()
@@ -219,22 +131,7 @@ function love.draw()
 
     -- weapon selection UI (screen-space)
     if isChoosingWeapon and weaponChoices and weaponChoiceRects then
-        love.graphics.setColor(0,0,0,0.6)
-        love.graphics.rectangle("fill", 0, 0, width, height)
-        love.graphics.setColor(1,1,1)
-        love.graphics.printf("Choose your starting weapon!", 0, height/2 - 160, width, "center")
-        for i, rect in ipairs(weaponChoiceRects) do
-            love.graphics.setColor(0.12,0.12,0.12,0.95)
-            love.graphics.rectangle("fill", rect.x, rect.y, rect.width, rect.height, 8, 8)
-            love.graphics.setColor(1,1,1)
-            love.graphics.printf(rect.title, rect.x, rect.y + 8, rect.width, "center")
-            if rect.image then
-                local iw, ih = rect.image:getWidth(), rect.image:getHeight()
-                local scale = math.min((rect.width-40)/iw, (rect.height-60)/ih)
-                love.graphics.draw(rect.image, rect.x + rect.width/2, rect.y + rect.height/2 + 8, 0, scale, scale, iw/2, ih/2)
-            end
-            love.graphics.print("("..i..")", rect.x + 8, rect.y + 8)
-        end
+        uiWeaponSelection.draw(width, height, weaponChoiceRects)
         return
     end
 
@@ -286,46 +183,7 @@ function love.draw()
     
     -- Draw upgrade menu overlay when active
     if showUpgradeMenu and upgradeChoices then
-        love.graphics.setColor(0, 0, 0, 0.6)
-        love.graphics.rectangle("fill", 0, 0, width, height)
-        love.graphics.setColor(1, 1, 1)
-        -- header text
-        local header = "Level Up! use mouse or number keys to select your upgrade"
-        local headerY = height/2 - 160
-        love.graphics.printf(header, 0, headerY, width, "center")
-        local desiredBoxW, boxH = 300, 120
-        local gap = 20
-        local margin = 20
-        local n = #upgradeChoices
-        -- compute box width so choices always fit within window (respecting margins)
-        local totalNeeded = desiredBoxW * n + gap * (n - 1)
-        local boxW = desiredBoxW
-        local startX = 0
-        if totalNeeded <= (width - 2 * margin) then
-            startX = (width - totalNeeded) / 2
-        else
-            boxW = math.floor((width - 2 * margin - gap * (n - 1)) / n)
-            if boxW < 80 then boxW = 80 end
-            startX = margin
-        end
-        upgradeChoiceRects = {}
-        for i, up in ipairs(upgradeChoices) do
-            local bx = startX + (i - 1) * (boxW + gap)
-            local by = height / 2 - boxH / 2
-            love.graphics.setColor(0.12, 0.12, 0.12, 0.95)
-            love.graphics.rectangle("fill", bx, by, boxW, boxH, 8, 8)
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.print(up.name, bx + 12, by + 10)
-            -- wrap description text to stay inside the choice box
-            local descX = bx + 12
-            local descY = by + 36
-            local descWidth = boxW - 24
-            love.graphics.printf(up.desc, descX, descY, descWidth, "left")
-            -- draw number label for keyboard selection
-            local numLabel = "(" .. i .. ")"
-            love.graphics.print(numLabel, bx + boxW - 28, by + 10)
-            upgradeChoiceRects[i] = { x = bx, y = by, width = boxW, height = boxH }
-        end
+        upgradeChoiceRects = uiUpgradeMenu.draw(width, height, upgradeChoices)
     end
 end
 
@@ -333,54 +191,29 @@ function love.keypressed(key)
     -- weapon selection via number keys
     if isChoosingWeapon and weaponChoiceRects and weaponChoices then
         -- block key selection while the initial click buffer is active
-        if not weaponSelectionBuffer or weaponSelectionBuffer <= 0 then
-            local n = tonumber(key)
-                if n and weaponChoiceRects[n] then
-                    selectedWeapon = weaponChoiceRects[n].id
-                    isChoosingWeapon = false
-                    weaponChoiceRects = nil
-                    weaponChoices = nil
-                    -- start a new randomized map/run
-                    newGame()
-                    return
-            end
-            if key:sub(1,2) == "kp" then
-                local k = tonumber(key:sub(3))
-                if k and weaponChoiceRects[k] then
-                    selectedWeapon = weaponChoiceRects[k].id
+            if not weaponSelectionBuffer or weaponSelectionBuffer <= 0 then
+                local sel = uiWeaponSelection.handleKey(key, weaponChoiceRects, weaponSelectionBuffer)
+                if sel then
+                    selectedWeapon = sel
                     isChoosingWeapon = false
                     weaponChoiceRects = nil
                     weaponChoices = nil
                     newGame()
                     return
                 end
-            end
         end
     end
     -- allow number key selection when upgrade menu is active
     if showUpgradeMenu and upgradeChoices then
         -- accept both main row and numpad keys ("1", "2", "3")
-        local n = tonumber(key)
-        if n and upgradeChoices[n] then
-            local chosen = upgradeChoices[n]
-            if chosen and chosen.apply then chosen.apply(player) end
-            showUpgradeMenu = false
-            upgradeChoices = nil
-            upgradeChoiceRects = nil
-            return
-        end
-        -- also accept keypad keys like "kp1" etc
-        if key:sub(1,2) == "kp" then
-            local k = tonumber(key:sub(3))
-            if k and upgradeChoices[k] then
-                local chosen = upgradeChoices[k]
-                if chosen and chosen.apply then chosen.apply(player) end
+            local chosen = uiUpgradeMenu.handleKey(key, upgradeChoices)
+            if chosen and chosen.apply then
+                chosen.apply(player)
                 showUpgradeMenu = false
                 upgradeChoices = nil
                 upgradeChoiceRects = nil
                 return
             end
-        end
     end
 end
 
@@ -391,25 +224,7 @@ function love.update(dt)
         isChoosingWeapon = true
         selectedWeapon = nil
         weaponSelectionBuffer = 1.0 -- seconds to ignore immediate selection clicks/keys
-        -- prepare weapon choices and rects for input (positions computed once)
-        local choices = {
-            { id = "sword", image = selectionSwordImage, title = "Sword" },
-            { id = "boomerang", image = selectionBoomerangImage, title = "Boomerang" },
-            { id = "pistol", image = selectionPistolImage, title = "Pistol" }
-        }
-        local n = #choices
-        local boxW = math.min(300, math.floor((width - 80 - (n-1)*20) / n))
-        if boxW < 100 then boxW = 100 end
-        local boxH = 160
-        local gap = 20
-        local startX = (width - (boxW * n + gap * (n - 1))) / 2
-        weaponChoiceRects = {}
-        weaponChoices = choices
-        for i, ch in ipairs(choices) do
-            local bx = startX + (i-1) * (boxW + gap)
-            local by = height/2 - boxH/2
-            weaponChoiceRects[i] = { x = bx, y = by, width = boxW, height = boxH, id = ch.id, image = ch.image, title = ch.title }
-        end
+        weaponChoices, weaponChoiceRects = uiWeaponSelection.buildChoices(width, height, selectionSwordImage, selectionBoomerangImage, selectionPistolImage)
     end
 
     if isAtTitleScreen then
@@ -423,17 +238,13 @@ function love.update(dt)
             weaponSelectionBuffer = math.max(0, weaponSelectionBuffer - dt)
         end
         -- process clicks immediately (only after the buffer has expired)
-        if weaponChoiceRects and (not weaponSelectionBuffer or weaponSelectionBuffer <= 0) then
-            for i, rect in ipairs(weaponChoiceRects) do
-                if isClicking(rect) then
-                    selectedWeapon = rect.id
-                    isChoosingWeapon = false
-                    weaponChoiceRects = nil
-                    weaponChoices = nil
-                    newGame()
-                    break
-                end
-            end
+        local sel = uiWeaponSelection.handleMouse(weaponChoiceRects, weaponSelectionBuffer, isClicking)
+        if sel then
+            selectedWeapon = sel
+            isChoosingWeapon = false
+            weaponChoiceRects = nil
+            weaponChoices = nil
+            newGame()
         end
         -- do not run any other game updates while choosing the starting weapon
         return
@@ -487,23 +298,6 @@ function love.update(dt)
         end
     end
 
-    -- weapon selection input handling (mouse click)
-    if isChoosingWeapon and weaponChoiceRects then
-        -- only allow selection after the buffer expires to avoid accidental immediate clicks
-        if not weaponSelectionBuffer or weaponSelectionBuffer <= 0 then
-            for i, rect in ipairs(weaponChoiceRects) do
-                if isClicking(rect) then
-                    selectedWeapon = rect.id
-                    isChoosingWeapon = false
-                    weaponChoiceRects = nil
-                    weaponChoices = nil
-                    newGame()
-                    break
-                end
-            end
-        end
-    end
-
     -- handle death / reset here so gameplay module doesn't need global state
     if player.health <= 0 then
         isAtTitleScreen = true
@@ -522,18 +316,12 @@ function love.update(dt)
 
     -- handle upgrade menu input (click to choose)
     if showUpgradeMenu and upgradeChoiceRects and upgradeChoices then
-        for i, rect in ipairs(upgradeChoiceRects) do
-            if isClicking(rect) then
-                local chosen = upgradeChoices[i]
-                if chosen and chosen.apply then
-                    chosen.apply(player)
-                end
-                -- clear menu state and resume gameplay
-                showUpgradeMenu = false
-                upgradeChoices = nil
-                upgradeChoiceRects = nil
-                break
-            end
+        local chosen = uiUpgradeMenu.handleMouse(upgradeChoiceRects, upgradeChoices, isClicking)
+        if chosen and chosen.apply then
+            chosen.apply(player)
+            showUpgradeMenu = false
+            upgradeChoices = nil
+            upgradeChoiceRects = nil
         end
     end
 end

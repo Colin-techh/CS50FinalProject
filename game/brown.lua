@@ -56,3 +56,5 @@ function brownEnemy:update(options)
     end
 
 end
+
+return brownEnemy
