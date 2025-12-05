@@ -20,11 +20,20 @@ function smokeCloud:new(x, y, radius)
     obj.radius = radius
     return obj
 end
-function smokeCloud:update(dt)
+function smokeCloud:update(options)
+    local dt,player = options.dt, options.player
     self.age = self.age + dt
     self.radius = self.radius + dt * 10 -- Expand radius over time
     if self.age >= self.lifetime then
         self.isExpired = true
+    end
+
+    -- Check if player is inside the smoke cloud
+    local dx = player.x + player.width/2 - self.x
+    local dy = player.y + player.height/2 - self.y
+    local distance = math.sqrt(dx*dx + dy*dy)
+    if distance < self.radius then
+        player.health = player.health - self.damage * dt
     end
 end
 function smokeCloud:draw()

@@ -60,7 +60,8 @@ local function spawnBullet(px, py, vx, vy)
     b.drawScale = drawScaleBullet
     b.isExpired = false
 
-    function b:update(dt)
+    function b:update(options)
+        local dt = options.dt
         self.x = self.x + self.vX * self.speed * dt
         self.y = self.y + self.vY * self.speed * dt
         self.age = self.age + dt

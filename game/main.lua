@@ -264,7 +264,7 @@ function love.update(dt)
         for index = #projectiles, 1, -1 do
             local projectile = projectiles[index]
             if projectile then
-                projectile:update(dt)
+                projectile:update({player=player, dt=dt})
                 if projectile.isExpired then
                     table.remove(projectiles, index)
                 end
