@@ -75,6 +75,10 @@ function gameRun.newRun(state)
         local ex, ey = findSpawnSafeLocal()
         table.insert(enemySet, brownEnemy:new(ex, ey))
     end
+    for i=1,5 do
+        local ex, ey = findSpawnSafeLocal()
+        table.insert(enemySet, dartmouthEnemy:new(ex, ey))
+    end
 end
 
 return gameRun
