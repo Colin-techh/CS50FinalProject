@@ -4,7 +4,7 @@ local swordImage
 local attackInterval = 1.5    -- seconds between automatic slashes
 local attackDuration = 0.25   -- how long the slash is visible
 local reach = 38              -- distance from player's center to sword center
-damage = 5                    -- damage per hit
+local damage = 5                    -- damage per hit
 
 local state = {
     timer = 0,
@@ -74,7 +74,7 @@ function Sword.update(player, enemySet, dt)
         for _, enemy in pairs(enemySet) do
             if enemy and not state.hitEnemies[enemy] and isColliding(attackBox, enemy) then
                 -- calculate damage with critical hit chance
-                local baseDamage = 1 + (player.damage or 0)
+                local baseDamage = damage + (player.damage or 0)
                 local critChance = player.criticalHitChance or 0
                 local isCritical = math.random() < critChance
                 local damageDealt = isCritical and (baseDamage * 2) or baseDamage

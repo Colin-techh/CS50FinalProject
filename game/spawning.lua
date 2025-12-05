@@ -29,8 +29,8 @@ function spawningFunctions.spawnEnemy(options)
         local newEnemy = enemyType:new(ex, ey)
 
         -- scale health and damage with game time
-        newEnemy.health = newEnemy.health + math.floor(currentGameTime / 10)
-        newEnemy.damage = newEnemy.damage + math.floor(currentGameTime / 20)
+        newEnemy.health = newEnemy.health + math.floor(currentGameTime / 25)
+        newEnemy.damage = newEnemy.damage + math.floor(currentGameTime / 30)
 
         table.insert(options.enemySet, newEnemy)
     end
