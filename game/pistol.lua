@@ -44,7 +44,7 @@ local function facingToVector(facing)
     return 0, 1, math.pi/2
 end
 
-local function spawnBullet(px, py, vx, vy)
+local function spawnBullet(px, py, vx, vy, player)
     local b = {}
     b.x = px
     b.y = py
@@ -53,7 +53,8 @@ local function spawnBullet(px, py, vx, vy)
     b.speed = bulletSpeed
     b.age = 0
     b.lifetime = bulletLifetime
-    b.damage = damage
+    b.damage = damage + (player and player.damage or 0)
+    b.player = player
     b.width = bulletDisplaySize
     b.height = bulletDisplaySize
     b.image = bulletImage
@@ -75,6 +76,12 @@ local function spawnBullet(px, py, vx, vy)
             if not self.isExpired and enemy and (enemy.health == nil or enemy.health > 0) then
                 if isColliding(self, enemy) then
                     if enemy.decreaseHealth then enemy:decreaseHealth(self.damage) else enemy.health = (enemy.health or 0) - self.damage end
+                    
+                    -- apply lifesteal
+                    if self.player and self.player.lifesteal and self.player.lifesteal > 0 then
+                        self.player.health = math.min(self.player.health + self.damage * self.player.lifesteal, self.player.maxHealth)
+                    end
+                    
                     -- simple knockback
                     local ex = (enemy.x or 0) + (enemy.width or 0)/2
                     local ey = (enemy.y or 0) + (enemy.height or 0)/2
@@ -109,7 +116,23 @@ function Pistol.tryFire(player)
     local px = player.x + (player.width or 0)/2
     local py = player.y + (player.height or 0)/2
     local vx, vy, _ = facingToVector(player.facing)
-    spawnBullet(px + vx * (player.width/2 + 4), py + vy * (player.height/2 + 4), vx, vy)
+    
+    -- spawn main bullet
+    spawnBullet(px + vx * (player.width/2 + 4), py + vy * (player.height/2 + 4), vx, vy, player)
+    
+    -- spawn extra projectiles if upgrade active
+    local extraCount = player.extraProjectiles or 0
+    if extraCount > 0 then
+        local angleOffset = math.pi / 6 -- 30 degrees between projectiles
+        for i = 1, extraCount do
+            local angle = math.atan2(vy, vx)
+            local offsetAngle = angle + (angleOffset * i)
+            local evx = math.cos(offsetAngle)
+            local evy = math.sin(offsetAngle)
+            spawnBullet(px + evx * (player.width/2 + 4), py + evy * (player.height/2 + 4), evx, evy, player)
+        end
+    end
+    
     state.cooldown = 1 / fireRate
 end
 
@@ -129,7 +152,23 @@ function Pistol.update(player, enemySetLocal, dt)
             local d = math.sqrt(dx*dx + dy*dy)
             if d == 0 then d = 0.0001 end
             local vx, vy = dx / d, dy / d
-            spawnBullet(px + vx * (player.width/2 + 4), py + vy * (player.height/2 + 4), vx, vy)
+            
+            -- spawn main bullet
+            spawnBullet(px + vx * (player.width/2 + 4), py + vy * (player.height/2 + 4), vx, vy, player)
+            
+            -- spawn extra projectiles if upgrade active
+            local extraCount = player.extraProjectiles or 0
+            if extraCount > 0 then
+                local angleOffset = math.pi / 6 -- 30 degrees between projectiles
+                for i = 1, extraCount do
+                    local angle = math.atan2(vy, vx)
+                    local offsetAngle = angle + (angleOffset * i)
+                    local evx = math.cos(offsetAngle)
+                    local evy = math.sin(offsetAngle)
+                    spawnBullet(px + evx * (player.width/2 + 4), py + evy * (player.height/2 + 4), evx, evy, player)
+                end
+            end
+            
             state.cooldown = 1 / fireRate
         end
     end
