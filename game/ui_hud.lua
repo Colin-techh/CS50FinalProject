@@ -3,9 +3,16 @@ local ui_hud = {}
 
 -- Draw basic HUD info (health, XP, enemy count)
 function ui_hud.drawBasic(player, enemyCount)
-    love.graphics.print("Health: " .. player.health, 10, 10)
-    love.graphics.print("XP: " .. player.xp, 10, 30)
-    love.graphics.print("Enemies: " .. enemyCount, 10, 50)
+    love.graphics.setColor(0, 0, 0, 0.6)
+    love.graphics.rectangle("fill", 5, 5, 120, 50)
+
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.rectangle("line", 5, 5, 120, 50)
+
+    love.graphics.print("Health: " .. player.health, 12, 12)
+    love.graphics.print("XP:     " .. player.xp,     12, 30)
+
+    love.graphics.setColor(1, 1, 1)
 end
 
 -- Draw game timer at top center
