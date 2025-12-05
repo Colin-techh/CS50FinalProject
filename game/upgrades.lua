@@ -1,5 +1,6 @@
 local upgrades = {}
 
+-- All upgrade options for the player
 local pool = {
     {
         id = "max_health",

@@ -1,8 +1,7 @@
--- ui_upgradeMenu.lua
 -- Handles drawing and input for the upgrade selection overlay.
 
 local uiUpgradeMenu = {}
-
+-- Draw upgrade menu and return rectangles for each upgrade option
 function uiUpgradeMenu.draw(screenW, screenH, upgradeChoices)
     local rects = {}
     love.graphics.setColor(0, 0, 0, 0.6)
@@ -11,7 +10,7 @@ function uiUpgradeMenu.draw(screenW, screenH, upgradeChoices)
     local header = "Level Up! use mouse or number keys to select your upgrade"
     local headerY = screenH/2 - 160
     love.graphics.printf(header, 0, headerY, screenW, "center")
-
+    -- Calculate layout for upgrade option boxes
     local desiredBoxW, boxH = 300, 120
     local gap = 20
     local margin = 20
@@ -26,7 +25,7 @@ function uiUpgradeMenu.draw(screenW, screenH, upgradeChoices)
         if boxW < 80 then boxW = 80 end
         startX = margin
     end
-
+    -- Draw each upgrade option box
     for i, up in ipairs(upgradeChoices) do
         local bx = startX + (i - 1) * (boxW + gap)
         local by = screenH / 2 - boxH / 2
@@ -44,7 +43,7 @@ function uiUpgradeMenu.draw(screenW, screenH, upgradeChoices)
     end
     return rects
 end
-
+-- Handle mouse selection (returns upgrade or nil)
 function uiUpgradeMenu.handleMouse(rects, upgradeChoices, isClicking)
     if not rects or not upgradeChoices then return nil end
     for i, rect in ipairs(rects) do
@@ -54,7 +53,7 @@ function uiUpgradeMenu.handleMouse(rects, upgradeChoices, isClicking)
     end
     return nil
 end
-
+-- Handle keyboard selection (returns upgrade or nil)
 function uiUpgradeMenu.handleKey(key, upgradeChoices)
     if not upgradeChoices then return nil end
     local n = tonumber(key)

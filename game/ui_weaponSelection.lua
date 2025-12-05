@@ -1,8 +1,7 @@
--- ui_weaponSelection.lua
 -- Handles weapon selection overlay drawing and input.
 
 local uiWeaponSelection = {}
-
+-- Build weapon choice rectangles, only at start of game
 function uiWeaponSelection.buildChoices(screenW, screenH, swordImg, boomImg, pistolImg)
     local choices = {
         { id = "sword", image = swordImg, title = "Sword" },
@@ -23,7 +22,7 @@ function uiWeaponSelection.buildChoices(screenW, screenH, swordImg, boomImg, pis
     end
     return choices, rects
 end
-
+-- Draw weapon selection overlay
 function uiWeaponSelection.draw(screenW, screenH, rects)
     love.graphics.setColor(0,0,0,0.6)
     love.graphics.rectangle("fill", 0, 0, screenW, screenH)
