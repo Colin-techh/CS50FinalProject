@@ -1,4 +1,4 @@
-spawningFunctions = {}
+local spawningFunctions = {}
 
 local lastTimeSpawned = 0
 function spawningFunctions.spawnEnemy(options)
