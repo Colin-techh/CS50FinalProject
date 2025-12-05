@@ -69,14 +69,14 @@ function love.load()
     require("dartmouth")
     enemySet = {}
 
-    for i=1,5 do
-        local enemy = yaleEnemy:new(math.random(0, 800), math.random(0, 600))
-        addEnemy(enemy)
-    end
-    for i=1,5 do
-        local enemy = brownEnemy:new(math.random(0, 800), math.random(0, 600))
-        addEnemy(enemy)
-    end
+    -- for i=1,5 do
+    --     local enemy = yaleEnemy:new(math.random(0, 800), math.random(0, 600))
+    --     addEnemy(enemy)
+    -- end
+    -- for i=1,5 do
+    --     local enemy = brownEnemy:new(math.random(0, 800), math.random(0, 600))
+    --     addEnemy(enemy)
+    -- end
     for i=1,5 do
         local enemy = dartmouthEnemy:new(math.random(0, 800), math.random(0, 600))
         addEnemy(enemy)
@@ -219,6 +219,11 @@ function newGame()
     for i=1,5 do
         local ex, ey = findSpawnSafeLocal()
         local enemy = brownEnemy:new(ex, ey)
+        addEnemy(enemy)
+    end
+    for i=1,5 do
+        local ex, ey = findSpawnSafeLocal()
+        local enemy = dartmouthEnemy:new(ex, ey)
         addEnemy(enemy)
     end
 end
@@ -502,7 +507,7 @@ function love.update(dt)
         for index = #projectiles, 1, -1 do
             local projectile = projectiles[index]
             if projectile then
-                projectile:update(dt)
+                projectile:update({dt=dt, player=player})
                 if projectile.isExpired then
                     table.remove(projectiles, index)
                 end
