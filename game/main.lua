@@ -77,6 +77,10 @@ function love.load()
         local enemy = brownEnemy:new(math.random(0, 800), math.random(0, 600))
         addEnemy(enemy)
     end
+    for i=1,5 do
+        local enemy = dartmouthEnemy:new(math.random(0, 800), math.random(0, 600))
+        addEnemy(enemy)
+    end
     -- Player
     -- start the player centered in the background world
     local bgW, bgH = background:getWidth(), background:getHeight()
