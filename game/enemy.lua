@@ -32,6 +32,7 @@ function enemy:setPosition(x, y)
 end
 function enemy:update(options)
     player, dt, enemySet = options.player, options.dt, options.enemySet
+    local map = require("map")
     for index, enemy in pairs(enemySet) do
         local collides = require("collisions")(enemy, self)
         if collides then
@@ -47,8 +48,41 @@ function enemy:update(options)
     local vY = player.y - self.y
     local distance = math.sqrt(vX^2 + vY^2)
     if distance > 0 then
-        self.x = self.x + (vX / distance) * self.speed * dt
-        self.y = self.y + (vY / distance) * self.speed * dt
+        local moveX = (vX / distance) * self.speed * dt
+        local moveY = (vY / distance) * self.speed * dt
+        -- axis-separated moves checking map collision
+        local testBoxX = { x = self.x + moveX, y = self.y, width = self.width or 0, height = self.height or 0 }
+        local blockedX = map:collidesWithBlocking(testBoxX)
+        local testBoxY = { x = self.x, y = self.y + moveY, width = self.width or 0, height = self.height or 0 }
+        local blockedY = map:collidesWithBlocking(testBoxY)
+
+        local moved = false
+        if not blockedX then
+            self.x = self.x + moveX
+            moved = true
+        end
+        if not blockedY then
+            self.y = self.y + moveY
+            moved = true
+        end
+
+        -- simple detour: if both axes blocked attempt a perpendicular step to go around
+        if not moved then
+            local perpX = -moveY
+            local perpY = moveX
+            local testBoxPerp1 = { x = self.x + perpX, y = self.y + perpY, width = self.width or 0, height = self.height or 0 }
+            if not map:collidesWithBlocking(testBoxPerp1) then
+                self.x = self.x + perpX
+                self.y = self.y + perpY
+            else
+                -- try the other side
+                local testBoxPerp2 = { x = self.x - perpX, y = self.y - perpY, width = self.width or 0, height = self.height or 0 }
+                if not map:collidesWithBlocking(testBoxPerp2) then
+                    self.x = self.x - perpX
+                    self.y = self.y - perpY
+                end
+            end
+        end
     end
 end
 return enemy

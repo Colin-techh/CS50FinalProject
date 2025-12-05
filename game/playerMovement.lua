@@ -18,9 +18,24 @@ function update(player, key_mappings, dt)
     if isDown(key_mappings.left) then input.x = -1 end
     if isDown(key_mappings.right) then input.x = 1 end
 
-    -- Apply regular movement
-    player.x = player.x + input.x * player.speed * dt
-    player.y = player.y + input.y * player.speed * dt
+    -- Apply movement with collision against blocking map objects (axis-separated)
+    local map = require("map")
+    local dx = input.x * (player.speed or 0) * dt
+    local dy = input.y * (player.speed or 0) * dt
+    -- try horizontal move
+    if dx ~= 0 then
+        local testBox = { x = player.x + dx, y = player.y, width = player.width or 0, height = player.height or 0 }
+        if not map:collidesWithBlocking(testBox) then
+            player.x = player.x + dx
+        end
+    end
+    -- try vertical move
+    if dy ~= 0 then
+        local testBox = { x = player.x, y = player.y + dy, width = player.width or 0, height = player.height or 0 }
+        if not map:collidesWithBlocking(testBox) then
+            player.y = player.y + dy
+        end
+    end
 
     -- Update facing based on last input (cardinal directions only)
     if input.x > 0 then

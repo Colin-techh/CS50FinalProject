@@ -51,20 +51,19 @@ function love.load()
     require("yale")
     require("brown")
 
+
     enemySet = {}
 
-    for i=1,5 do
-        local enemy = yaleEnemy:new(math.random(0, 800), math.random(0, 600))
-        addEnemy(enemy)
-    end
-    for i=1,5 do
-        local enemy = brownEnemy:new(math.random(0, 800), math.random(0, 600))
-        addEnemy(enemy)
-    end
+    -- spawn enemies avoiding blocking obstacles and player start area
+    -- (the real findSpawnSafe is declared after we load the map and compute map dimensions)
+
+    -- (map will be loaded after player creation so player's start area can be passed as a safe zone)
     -- Player
+    -- start the player centered in the background world
+    local bgW, bgH = background:getWidth(), background:getHeight()
     player = { 
-        x = 300,
-        y = 300,
+        x = math.floor(bgW / 2 - 32 / 2),
+        y = math.floor(bgH / 2 - 32 / 2),
         speed = 100,
         width = 32,
         height = 32,
@@ -104,6 +103,47 @@ function love.load()
 
     -- Projectiles
     projectiles = {}
+    -- load map for the entire background image (background.png is the game world)
+    map = require("map")
+    local mapW, mapH = background:getWidth(), background:getHeight()
+    -- scale counts for very large worlds so objects remain sparse by default
+    local baseArea = 800 * 600
+    local areaRatio = (mapW * mapH) / baseArea
+    -- increase density: user requested ~3x more objects across the whole map
+    local scaleFactor = 0.60 -- higher density (about 3× previous 0.20)
+    local counts = {
+        trees = math.max(2, math.floor(4 * areaRatio * scaleFactor)),
+        rocks = math.max(2, math.floor(3 * areaRatio * scaleFactor)),
+        grass = math.max(8, math.floor(12 * areaRatio * scaleFactor)),
+    }
+    map.load({ width = mapW, height = mapH, counts = counts, safeZones = { { x = player.x, y = player.y, width = player.width, height = player.height } } })
+
+    -- spawn enemies avoiding blocking obstacles and the player's start area
+    local function findSpawnSafe()
+        local tries = 0
+        while tries < 500 do
+            tries = tries + 1
+                local x = math.random(0, mapW)
+                local y = math.random(0, mapH)
+            local box = { x = x, y = y, width = 32, height = 32 }
+            -- avoid player starting area (guaranteed safe zone)
+            if not map:collidesWithBlocking(box) and not map:overlapsAny(box) then
+                return x, y
+            end
+        end
+        return math.random(0, mapW), math.random(0, mapH)
+    end
+
+    for i=1,5 do
+        local ex, ey = findSpawnSafe()
+        local enemy = yaleEnemy:new(ex, ey)
+        addEnemy(enemy)
+    end
+    for i=1,5 do
+        local ex, ey = findSpawnSafe()
+        local enemy = brownEnemy:new(ex, ey)
+        addEnemy(enemy)
+    end
 end
 
 function love.draw()
@@ -111,8 +151,14 @@ function love.draw()
         -- Draw play button
         love.graphics.setBlendMode("alpha")
         love.graphics.draw(startImage, width/2 - startImage:getWidth()/8, height/2 - startImage:getHeight()/8, 0, 0.25, 0.25)
-        player.x = 300
-        player.y = 300
+        -- center the player for the title screen (and when returning to title)
+        if background then
+            player.x = math.floor(background:getWidth() / 2 - (player.width or 0) / 2)
+            player.y = math.floor(background:getHeight() / 2 - (player.height or 0) / 2)
+        else
+            player.x = 300
+            player.y = 300
+        end
         
         return
     end
@@ -143,6 +189,8 @@ function love.draw()
 
     -- Draw the background image at the top-left corner (world coordinates)
     love.graphics.draw(background, 0, 0)
+    -- draw background map elements (grass) underneath characters
+    if map and map.drawGrass then map:drawGrass() end
 
     -- Draw player and enemies in world space
     -- Flash player while invulnerable
@@ -173,6 +221,8 @@ function love.draw()
     if selectedWeapon == "boomerang" then
         boomerang.draw(player, enemySet)
     end
+    -- draw blocking map elements (rocks / trees) above characters
+    if map and map.drawBlocking then map:drawBlocking() end
     camera:detach()
 
     -- Draw HUD elements in screen space
@@ -371,7 +421,7 @@ function love.update(dt)
         for index = #projectiles, 1, -1 do
             local projectile = projectiles[index]
             if projectile then
-                projectile:update({player=player, dt=dt})
+                projectile:update(dt)
                 if projectile.isExpired then
                     table.remove(projectiles, index)
                 end
@@ -399,10 +449,15 @@ function love.update(dt)
     if player.health <= 0 then
         isAtTitleScreen = true
         player.health = 3
-        player.x = 300
-        player.y = 300
+        if background then
+            player.x = math.floor(background:getWidth() / 2 - (player.width or 0) / 2)
+            player.y = math.floor(background:getHeight() / 2 - (player.height or 0) / 2)
+        else
+            player.x = 300
+            player.y = 300
+        end
         for index, enemy in pairs(enemySet) do
-            enemy:setPosition(math.random(0, 800), math.random(0, 600))
+            enemy:setPosition(math.random(0, background and background:getWidth() or 800), math.random(0, background and background:getHeight() or 600))
         end
     end
 
