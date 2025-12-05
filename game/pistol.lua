@@ -26,6 +26,9 @@ function Pistol.load()
     if love.filesystem.getInfo("assets/pistol_bullet.png") then
         bulletImage = love.graphics.newImage("assets/pistol_bullet.png")
     end
+    
+    pistolImage = sprites["pistol"]
+    bulletImage = sprites["pistol_bullet"]
     -- compute scales
     if pistolImage then
         local iw, ih = pistolImage:getWidth(), pistolImage:getHeight()
@@ -56,7 +59,7 @@ local function spawnBullet(px, py, vx, vy)
     b.damage = damage
     b.width = bulletDisplaySize
     b.height = bulletDisplaySize
-    b.image = bulletImage
+    b.image = "pistol_bullet"
     b.drawScale = drawScaleBullet
     b.isExpired = false
 
@@ -91,7 +94,8 @@ local function spawnBullet(px, py, vx, vy)
     function b:draw()
         if self.image then
             local angle = math.atan2(self.vY, self.vX)
-            love.graphics.draw(self.image, self.x, self.y, angle, self.drawScale, self.drawScale, (self.image:getWidth()/2), (self.image:getHeight()/2))
+            local img = sprite["pistol"]
+            love.graphics.draw(img, self.x, self.y, angle, self.drawScale, self.drawScale, (img:getWidth()/2), (img:getHeight()/2))
         else
             love.graphics.circle("fill", self.x, self.y, self.width/2)
         end

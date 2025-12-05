@@ -14,13 +14,17 @@ function projectileClass:new(options)
     obj.lifetime = options.lifetime or 2 -- seconds
     obj.age = 0
     obj.isExpired = false
-    obj.imagePath = options.imagePath or "assets/sword.png"
+    obj.image = options.imagePath or "sword"
     return obj
 end
 function projectileClass:draw()
-    love.graphics.draw(self.image, self.x, self.y)
+    if not sprites[self.image] then
+        return
+    end
+    love.graphics.draw(sprites[self.image], self.x, self.y)
 end
-function projectileClass:update(dt)
+function projectileClass:update(options)
+    local dt = options.dt
     self.x = self.x + self.vX * self.speed * dt
     self.y = self.y + self.vY * self.speed * dt
     self.age = self.age + dt

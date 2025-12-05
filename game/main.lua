@@ -3,11 +3,27 @@ local Camera = require "libs.hump-master.camera"
 
 camera = Camera(0, 0)
 
+
+
 function love.load()
     love.window.setTitle("My Awesome Game")
     width, height = love.graphics.getDimensions()
     -- Background image
     background = love.graphics.newImage("assets/background.png")
+
+    -- Call .newImage on all sprites
+    sprites = {
+        player = love.graphics.newImage("assets/player1.png"),
+        sword = love.graphics.newImage("assets/sword.png"),
+        boomerang = love.graphics.newImage("assets/boomerang.png"),
+        pistol = love.graphics.newImage("assets/pistol.png"),
+        bottle = love.graphics.newImage("assets/bottle.png"),
+        enemy1 = love.graphics.newImage("assets/enemy1.png"),
+        enemy2 = love.graphics.newImage("assets/enemy2.png"),
+        enemy3 = love.graphics.newImage("assets/enemy3.png"),
+        pistol_bullet = love.graphics.newImage("assets/pistol_bullet.png")
+    }
+
 
     isColliding = require("collisions")
     isClicking = require("isClicking")
@@ -25,7 +41,7 @@ function love.load()
     }
 
     -- player image
-    playerImage = love.graphics.newImage("assets/player1.png")
+    playerImage = sprites["player"]
     -- sword (automatic slash)
     sword = require("sword")
     sword.load()
@@ -37,9 +53,9 @@ function love.load()
     pistol.load()
 
     -- UI selection images (reuse assets)
-    selectionSwordImage = love.graphics.newImage("assets/sword.png")
-    selectionBoomerangImage = love.graphics.newImage("assets/boomerang.png")
-    selectionPistolImage = love.graphics.newImage("assets/pistol.png")
+    selectionSwordImage = sprites["sword"]
+    selectionBoomerangImage = sprites["boomerang"]
+    selectionPistolImage = sprites["pistol"]
     
     key_mappings = {
         up    = {"w", "up"},
@@ -50,15 +66,19 @@ function love.load()
     -- Enemy setup
     require("yale")
     require("brown")
-
+    require("dartmouth")
     enemySet = {}
 
-    for i=1,5 do
+    for i=1,0 do
         local enemy = yaleEnemy:new(math.random(0, 800), math.random(0, 600))
         addEnemy(enemy)
     end
-    for i=1,5 do
+    for i=1,0 do
         local enemy = brownEnemy:new(math.random(0, 800), math.random(0, 600))
+        addEnemy(enemy)
+    end
+    for i=1,5 do
+        local enemy = dartmouthEnemy:new(math.random(0, 800), math.random(0, 600))
         addEnemy(enemy)
     end
     -- Player
