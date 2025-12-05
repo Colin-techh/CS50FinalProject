@@ -69,13 +69,13 @@ function love.load()
     }
 
     -- sword (automatic slash)
-    sword = require("sword")
+    sword = require("weapons/sword")
     sword.load()
-        -- boomerang (auto-launch toward nearest enemy when returned)
-        boomerang = require("boomerang")
-        boomerang.load()
+    -- boomerang (auto-launch boomerang toward nearest enemy when returned)
+    boomerang = require("weapons/boomerang")
+    boomerang.load()
     -- pistol (player weapon)
-    pistol = require("pistol")
+    pistol = require("weapons/pistol")
     pistol.load()
 
     -- Start game timer
@@ -93,10 +93,10 @@ function love.load()
         right = {"d", "right"},
     }
     -- Enemy setup
-    require("yale")
-    require("brown")
-    require("dartmouth")
-    require("cornell")
+    require("mobs/yale")
+    require("mobs/brown")
+    require("mobs/dartmouth")
+    require("mobs/cornell")
     enemySet = {}
     projectiles = {}
     map = require("map")
