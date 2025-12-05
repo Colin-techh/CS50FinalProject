@@ -31,19 +31,27 @@ function enemy:setPosition(x, y)
     self.y = y
 end
 function enemy:update(options)
-    player, dt, enemySet = options.player, options.dt, options.enemySet
+    local player = options and options.player
+    local dt = (options and options.dt) or 0
+    local enemySet = options and options.enemySet or {}
+
+    if not player then return end -- nothing to do if player missing
+
     local map = require("map")
-    for index, enemy in pairs(enemySet) do
-        local collides = require("collisions")(enemy, self)
-        if collides then
-            local dx = self.x - enemy.x
-            local dy = self.y - enemy.y
-            local dist = math.sqrt(dx*dx + dy*dy)
-            if dist == 0 then dist = 0.0001 end
-            self.x = self.x + (dx / dist) * 1
-            self.y = self.y + (dy / dist) * 1
+    for index, other in pairs(enemySet) do
+        if other ~= self then
+            local collides = require("collisions")(other, self)
+            if collides then
+                local dx = self.x - other.x
+                local dy = self.y - other.y
+                local dist = math.sqrt(dx*dx + dy*dy)
+                if dist == 0 then dist = 0.0001 end
+                self.x = self.x + (dx / dist) * 1
+                self.y = self.y + (dy / dist) * 1
+            end
         end
     end
+
     local vX = player.x - self.x
     local vY = player.y - self.y
     local distance = math.sqrt(vX^2 + vY^2)
