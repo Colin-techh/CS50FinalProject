@@ -3,11 +3,11 @@ local upgrades = {}
 local pool = {
     {
         id = "max_health",
-        name = "Max Health +1",
-        desc = "Increase your maximum health by 1 and heal 1 HP.",
+        name = "Max Health +3",
+        desc = "Increase your maximum health by 3 and heal 3 HP.",
         apply = function(player)
-            player.maxHealth = (player.maxHealth or 3) + 1
-            player.health = math.min(player.health + 1, player.maxHealth)
+            player.maxHealth = (player.maxHealth or 3) + 3
+            player.health = math.min(player.health + 3, player.maxHealth)
         end
     },
     {
@@ -28,8 +28,8 @@ local pool = {
     },
     {
         id = "invuln_duration",
-        name = "Shorter Invulnerability",
-        desc = "Reduce invulnerability frame duration by 15%.",
+        name = "Shorter Enemy Invulnerability",
+        desc = "Reduce enemy invulnerability frame duration by 15%.",
         apply = function(player)
             player.invulnDuration = math.max(0.1, (player.invulnDuration or 1.0) * 0.85)
         end

@@ -266,7 +266,8 @@ function love.draw()
         love.graphics.setFont(titleFont)
         local pauseText = "Game Paused"
         local pauseWidth = titleFont:getWidth(pauseText)
-        love.graphics.print(pauseText, width/2 - pauseWidth/2, height/2 - 120)
+        -- place the title above the Continue button
+        love.graphics.print(pauseText, width/2 - pauseWidth/2, pauseContinueButton.y - 70)
         
         -- Stats table on the left
         love.graphics.setFont(font)
