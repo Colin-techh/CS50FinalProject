@@ -10,3 +10,5 @@ function yaleEnemy:setPosition(x, y)
     self.x = x
     self.y = y
 end
+
+return yaleEnemy
