@@ -1,4 +1,4 @@
-function update(player, key_mappings, dt)
+local function update(player, key_mappings, dt)
     local input = {x = 0, y = 0}
 
     local isDown = function(mapping)

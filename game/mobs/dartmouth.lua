@@ -1,22 +1,27 @@
 local enemy = require("enemy")
+local projectileClass = require("projectile")
+local collides = require("collisions")
 dartmouthEnemy = {}
 setmetatable(dartmouthEnemy, {__index = enemy})
 function dartmouthEnemy:new(xx, yy)
-    local obj = enemy:new({x=xx, y=yy, width=22, height=28, speed=60, damage=2, knockback=64, health=10, xp=10, imagePath="assets/enemy3.png"})
+    -- Create dartmouth enemy using enemy base class
+    local obj = enemy:new({x=xx, y=yy, width=22, height=28, speed=60, damage=2, knockback=64, health=10, xp=10, imagePath="enemy3"})
+    -- Add wobble property for movement pattern (sinucoidal movement because Dartmouth students are perpetually wasted)
     obj.wobble = math.random() * 5
-    
     setmetatable(obj, {__index = dartmouthEnemy})
     return obj
 end
 function dartmouthEnemy:attack()
     -- throw beer bottle (bottle.png) at player and deal damage on contact
-    local projectileClass = require("projectile")
+
+    -- calculate velocity towards player
     local dx = player.x - self.x
     local dy = player.y - self.y
     local dist = math.sqrt(dx*dx + dy*dy)
     if dist == 0 then dist = 0.0001 end
     local vX = dx / dist
     local vY = dy / dist
+
     local bottle = projectileClass:new({
         x = self.x + self.width/2,
         y = self.y + self.height/2,
@@ -52,10 +57,10 @@ function dartmouthEnemy:attack()
     table.insert(projectiles, bottle)
 end
 function dartmouthEnemy:update(options)
+    -- Simple collision avoidance with other enemies
     player, dt, enemySet = options.player, options.dt, options.enemySet
     for index, enemy in pairs(enemySet) do
-        local collides = require("collisions")(enemy, self)
-        if collides then
+        if collides(enemy, self) then
             local dx = self.x - enemy.x
             local dy = self.y - enemy.y
             local dist = math.sqrt(dx*dx + dy*dy)
@@ -65,7 +70,7 @@ function dartmouthEnemy:update(options)
         end
     end
 
-   
+    -- Move towards player with wobble
     local wobble = love.timer.getTime() * 3 + self.wobble
     local wobbleX = math.sin(wobble) * 100
     local wobbleY = math.cos(wobble) * 100

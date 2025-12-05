@@ -1,11 +1,11 @@
-function damage(options)
+local collides = require("collisions")
+local function damage(options)
     player, currentEnemy = options.player, options.enemy
     damage = currentEnemy.damage
     local knockbackAmount = currentEnemy.knockback
 
     -- Collision & knockback: if colliding and not invulnerable, apply damage and knockback
-    local collides = require("collisions")(player, currentEnemy)
-    if collides and not player.isInvulnerable then
+    if collides(player, currentEnemy) and not player.isInvulnerable then
         -- reduce health
         player.health = player.health - damage
 

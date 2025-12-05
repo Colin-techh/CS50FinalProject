@@ -1,9 +1,10 @@
-projectileClass = require("projectile")
-smokeCloud = {}
+local projectileClass = require("projectile")
+local smokeCloud = {}
 function smokeCloud:new(x, y, radius)
     local obj = projectileClass:new({
         x = x,
         y = y,
+        radius = radius or 10,
         vX = 0,
         vY = 0,
         speed = 0,
@@ -14,10 +15,7 @@ function smokeCloud:new(x, y, radius)
         lifetime = 8, -- lasts for 5 seconds
         imagePath = nil
     })
-    self.__index = self
-    setmetatable(obj, self)
-    
-    obj.radius = radius
+    setmetatable(obj, {__index = smokeCloud})
     return obj
 end
 function smokeCloud:update(options)
@@ -56,3 +54,4 @@ function smokeCloud:draw()
     love.graphics.circle("fill", self.x, self.y, self.radius)
     love.graphics.setColor(1, 1, 1, 1) -- Reset color to opaque white 
 end
+return smokeCloud

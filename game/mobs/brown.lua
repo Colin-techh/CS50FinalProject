@@ -1,16 +1,13 @@
 local enemy = require("enemy")
+local collides = require("collisions")
 brownEnemy = {}
 setmetatable(brownEnemy, {__index = enemy})
-require("smokeCloud")
+smokeCloud = require("smokeCloud")
 function brownEnemy:new(xx, yy)
-    local obj = enemy:new({x=xx, y=yy, width=21, height=29, speed=75, damage=1, knockback=48, health=8, xp=8, imagePath="assets/enemy2.png"})
-    
+    -- Create new brown enemy using enemy base class
+    local obj = enemy:new({x=xx, y=yy, width=21, height=29, speed=75, damage=1, knockback=48, health=8, xp=8, imagePath="enemy2"})
     setmetatable(obj, {__index = self})
     return obj
-end
-function brownEnemy:draw()
-    love.graphics.draw(self.image, self.x, self.y)
-
 end
 function brownEnemy:attack()
     -- Create smoke cloud that deals DoT to player if they are inside it
@@ -23,10 +20,10 @@ function brownEnemy:update(options)
     local enemySet = options and options.enemySet or {}
     if not player then return end
 
+    -- Bump into other enemies to avoid overlapping
     for index, enemy in pairs(enemySet) do
         if enemy ~= self then
-            local collides = require("collisions")(enemy, self)
-            if collides then
+            if collides(enemy, self) then
                 local dx = self.x - enemy.x
                 local dy = self.y - enemy.y
                 local dist = math.sqrt(dx*dx + dy*dy)
@@ -37,6 +34,7 @@ function brownEnemy:update(options)
         end
     end
 
+    -- Move towards player
     local vX = player.x - self.x
     local vY = player.y - self.y
     local distance = math.sqrt(vX^2 + vY^2)

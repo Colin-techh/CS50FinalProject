@@ -1,18 +1,16 @@
 local enemy = require("enemy")
+local collides = require("collisions")
 cornellEnemy = {}
 setmetatable(cornellEnemy, {__index = enemy})
 function cornellEnemy:new(xx, yy)
-    local obj = enemy:new({x=xx, y=yy, width=84, height=116, speed=20, damage=5, knockback=48, health=12, takesKnockback = false, xp=15, imagePath="assets/enemy4.png"})
+    -- Create cornell enemy using enemy base class
+    local obj = enemy:new({x=xx, y=yy, width=84, height=116, speed=20, damage=5, knockback=48, health=12, takesKnockback = false, xp=15, imagePath="enemy4"})
     obj.takesKnockback = false
     setmetatable(obj, {__index = self})
     return obj
 end
-function cornellEnemy:draw()
-    love.graphics.draw(self.image, self.x, self.y, 0, 4, 4)
-
-end
 function cornellEnemy:attack()
-    -- Nothing for now
+    -- Nothing for now, could add a special attack later!
     
 end
 function cornellEnemy:update(options)
@@ -21,10 +19,10 @@ function cornellEnemy:update(options)
     local enemySet = options and options.enemySet or {}
     if not player then return end
 
+    -- Simple collision avoidance with other enemies
     for index, enemy in pairs(enemySet) do
         if enemy ~= self then
-            local collides = require("collisions")(enemy, self)
-            if collides then
+            if collides(enemy, self) then
                 local dx = self.x - enemy.x
                 local dy = self.y - enemy.y
                 local dist = math.sqrt(dx*dx + dy*dy)
@@ -35,6 +33,7 @@ function cornellEnemy:update(options)
         end
     end
 
+    -- Move towards player
     local vX = player.x - self.x
     local vY = player.y - self.y
     local distance = math.sqrt(vX^2 + vY^2)

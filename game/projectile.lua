@@ -1,20 +1,21 @@
-projectileClass = {}
+local projectileClass = {}
 projectileClass.__index = projectileClass
 function projectileClass:new(options)
-    local obj = {}
+    local obj = {
+        x = options.x or 0,
+        y = options.y or 0,
+        vX = options.vX or 0,
+        vY = options.vY or 0,
+        speed = options.speed or 200,
+        width = options.width or 8,
+        height = options.height or 8,
+        damage = options.damage or 1,
+        lifetime = options.lifetime or 2, -- seconds
+        age = 0,
+        isExpired = false,
+        image = options.imagePath or "sword"
+    }
     setmetatable(obj, projectileClass)
-    obj.x = options.x or 0
-    obj.y = options.y or 0
-    obj.vX = options.vX or 0
-    obj.vY = options.vY or 0
-    obj.speed = options.speed or 200
-    obj.width = options.width or 8
-    obj.height = options.height or 8
-    obj.damage = options.damage or 1
-    obj.lifetime = options.lifetime or 2 -- seconds
-    obj.age = 0
-    obj.isExpired = false
-    obj.image = options.imagePath or "sword"
     return obj
 end
 function projectileClass:draw()
@@ -24,6 +25,7 @@ function projectileClass:draw()
     love.graphics.draw(sprites[self.image], self.x, self.y)
 end
 function projectileClass:update(options)
+    -- Move projectile in direction of Vx and Vy
     local dt = options.dt
     self.x = self.x + self.vX * self.speed * dt
     self.y = self.y + self.vY * self.speed * dt
