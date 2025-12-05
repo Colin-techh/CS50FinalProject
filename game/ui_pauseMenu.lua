@@ -76,6 +76,7 @@ function ui_pauseMenu.draw(width, height, buttons, player, selectedWeapon)
     -- Display upgrade stats
     local stats = {
         {"Max Health", player.maxHealth or 3},
+        {"Level", player.level or 1},
         {"Damage", totalDamage},
         {"Attack Speed", string.format("+%.0f%% faster", attackSpeedBonus)},
         {"Speed", math.floor((player.speed or 100))},
