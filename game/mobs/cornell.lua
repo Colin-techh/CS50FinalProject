@@ -13,6 +13,12 @@ function cornellEnemy:attack()
     -- Nothing for now, could add a special attack later!
     
 end
+function cornellEnemy:draw()
+    if not sprites[self.image] then
+        return
+    end
+    love.graphics.draw(sprites[self.image], self.x, self.y, 0, 4, 4)
+end
 function cornellEnemy:update(options)
     local player = options and options.player
     local dt = (options and options.dt) or 0
