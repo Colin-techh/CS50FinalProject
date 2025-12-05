@@ -175,16 +175,20 @@ function Boomerang.update(player, enemySet, dt)
                     if player.lifesteal and player.lifesteal > 0 then
                         player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
                     end
-                    -- knockback
-                    local ex = (enemy.x or 0) + (enemy.width or 0)/2
-                    local ey = (enemy.y or 0) + (enemy.height or 0)/2
-                    local kdx = ex - bState.x
-                    local kdy = ey - bState.y
-                    local dist = math.sqrt(kdx*kdx + kdy*kdy)
-                    if dist == 0 then dist = 0.0001 end
-                    local kb = enemy.knockback or 20
-                    enemy.x = enemy.x + (kdx / dist) * kb
-                    enemy.y = enemy.y + (kdy / dist) * kb
+                    
+                    -- knockback for enemies that support it
+                    if enemy.takesKnockback then
+                        local ex = (enemy.x or 0) + (enemy.width or 0)/2
+                        local ey = (enemy.y or 0) + (enemy.height or 0)/2
+                        local kdx = ex - bState.x
+                        local kdy = ey - bState.y
+                        local dist = math.sqrt(kdx*kdx + kdy*kdy)
+                        if dist == 0 then dist = 0.0001 end
+                        local kb = enemy.knockback or 20
+                        enemy.x = enemy.x + (kdx / dist) * kb
+                        enemy.y = enemy.y + (kdy / dist) * kb 
+                    end
+
                     bState.hitEnemies[enemy] = true
                 end
             end

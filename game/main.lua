@@ -24,6 +24,7 @@ function love.load()
         enemy1 = love.graphics.newImage("assets/enemy1.png"),
         enemy2 = love.graphics.newImage("assets/enemy2.png"),
         enemy3 = love.graphics.newImage("assets/enemy3.png"),
+        enemy4 = love.graphics.newImage("assets/enemy4.png"),
         pistol_bullet = love.graphics.newImage("assets/pistol_bullet.png"),
         tree = love.graphics.newImage("assets/tree.png"),
         rock = love.graphics.newImage("assets/rock.png"),
@@ -76,6 +77,7 @@ function love.load()
     require("yale")
     require("brown")
     require("dartmouth")
+    require("cornell")
     enemySet = {}
     projectiles = {}
     map = require("map")
@@ -348,6 +350,7 @@ function love.update(dt)
             yaleEnemy = yaleEnemy,
             brownEnemy = brownEnemy,
             dartmouthEnemy = dartmouthEnemy,
+            cornellEnemy = cornellEnemy,
             findSpawnSafe = gameRun.makeSpawnFinder(map, background:getWidth(), background:getHeight(), player)
         })
     end

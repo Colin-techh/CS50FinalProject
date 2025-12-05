@@ -3,22 +3,25 @@ spawningFunctions = {}
 local lastTimeSpawned = 0
 function spawningFunctions.spawnEnemy(options)
     local currentGameTime = options.gameTime or 0
-
+    if currentGameTime == 0 then
+        lastTimeSpawned = 0
+    end
     -- spawn enemies randomly over time, increasing with gameTime and increasing in health and damage
     local spawnInterval = math.max(1, 5 - math.floor(currentGameTime / 30)) -- spawn more frequently over time
     
     -- function runs every frame, only spawn maximum once per second
-    if currentGameTime - lastTimeSpawned >= spawnInterval then
+    if currentGameTime % spawnInterval == 0 and lastTimeSpawned ~= currentGameTime then
         lastTimeSpawned = currentGameTime
         local enemyTypeRoll = math.random()
         local enemyType = nil
-        if enemyTypeRoll < 0.5 then
-            enemyType = options.yaleEnemy
-        elseif enemyTypeRoll < 0.8 then
-            enemyType = options.brownEnemy
-        else
-            enemyType = options.dartmouthEnemy
-        end
+        -- if enemyTypeRoll < 0.5 then
+        --     enemyType = options.yaleEnemy
+        -- elseif enemyTypeRoll < 0.8 then
+        --     enemyType = options.brownEnemy
+        -- else
+        --     enemyType = options.dartmouthEnemy
+        -- end
+        enemyType = options.cornellEnemy
 
         local ex, ey = options.findSpawnSafe()
         local newEnemy = enemyType:new(ex, ey)

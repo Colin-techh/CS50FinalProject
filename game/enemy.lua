@@ -12,6 +12,7 @@ function enemy:new(options)
         damage = damage or 1,
         knockback = knockback or 20,
         xp = options.xp or 5,
+        takesKnockback = options.takesKnockback or true,
         image = love.graphics.newImage(imagePath or "assets/enemy1.png")
     }
     -- obj.__index = self

@@ -90,6 +90,13 @@ function Sword.update(player, enemySet, dt)
                     player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
                 end
 
+                -- mark hit so same attack doesn't hit twice
+                state.hitEnemies[enemy] = true
+
+                -- skip knockback for cornell enemy
+                if enemy.takesKnockback == false then
+                    return
+                end
                 -- apply knockback to enemy away from attack center
                 local dx = enemy.x + (enemy.width or 0)/2 - ax
                 local dy = enemy.y + (enemy.height or 0)/2 - ay
@@ -99,8 +106,7 @@ function Sword.update(player, enemySet, dt)
                 enemy.x = enemy.x + (dx / dist) * kb
                 enemy.y = enemy.y + (dy / dist) * kb
 
-                -- mark hit so same attack doesn't hit twice
-                state.hitEnemies[enemy] = true
+                
             end
         end
     end

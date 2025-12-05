@@ -59,7 +59,7 @@ function gameRun.newRun(state)
     player.health = player.maxHealth or player.health
 
     -- Restart game time
-    gameTime = 0
+    gameTimer = 0
 
     -- clear world objects
     for k in pairs(projectiles) do projectiles[k] = nil end
