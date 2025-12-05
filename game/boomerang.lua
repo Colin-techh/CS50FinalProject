@@ -199,8 +199,9 @@ function Boomerang.update(player, enemySet, dt)
             local dx = bState.x - px
             local dy = bState.y - py
             bState.dist = math.sqrt(dx*dx + dy*dy)
+            local maxRange = range * (player.rangeMultiplier or 1)
 
-            if bState.dist >= range then
+            if bState.dist >= maxRange then
                 -- start return; reset hit list so return can hit enemies again
                 bState.hitEnemies = {}
                 local rdx = px - bState.x
@@ -229,7 +230,7 @@ function Boomerang.update(player, enemySet, dt)
                     bState.mode = "idle"
                     bState.vx, bState.vy = 0, 0
                     bState.angle = 0
-                    bState.cooldownTimer = waitAfterReturn
+                    bState.cooldownTimer = waitAfterReturn * (player.attackSpeedMultiplier or 1)
                     bState.x = px
                     bState.y = py
                 end
