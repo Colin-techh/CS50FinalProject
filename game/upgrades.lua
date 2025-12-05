@@ -84,6 +84,22 @@ local pool = {
         end
     },
     {
+        id = "attack_speed",
+        name = "Attack Speed +10%",
+        desc = "Decrease time between attacks by 10%.",
+        apply = function(player)
+            player.attackSpeedMultiplier = (player.attackSpeedMultiplier or 1.0) * 0.90
+        end
+    },
+    {
+        id = "range",
+        name = "Range +10%",
+        desc = "Increase weapon range by 10%.",
+        apply = function(player)
+            player.rangeMultiplier = (player.rangeMultiplier or 1.0) * 1.10
+        end
+    },
+    {
         id = "damage",
         name = "Damage +1",
         desc = "Increase damage dealt by 1.",

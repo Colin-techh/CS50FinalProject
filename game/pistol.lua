@@ -52,7 +52,7 @@ local function spawnBullet(px, py, vx, vy, player)
     b.vY = vy
     b.speed = bulletSpeed
     b.age = 0
-    b.lifetime = bulletLifetime
+    b.lifetime = bulletLifetime * (player and player.rangeMultiplier or 1)
     b.damage = damage + (player and player.damage or 0)
     b.player = player
     b.width = bulletDisplaySize
@@ -135,7 +135,7 @@ function Pistol.tryFire(player)
         end
     end
     
-    state.cooldown = 1 / fireRate
+    state.cooldown = (1 / fireRate) * (player.attackSpeedMultiplier or 1)
 end
 
 function Pistol.update(player, enemySetLocal, dt)
@@ -171,7 +171,7 @@ function Pistol.update(player, enemySetLocal, dt)
                 end
             end
             
-            state.cooldown = 1 / fireRate
+            state.cooldown = (1 / fireRate) * (player.attackSpeedMultiplier or 1)
         end
     end
 end

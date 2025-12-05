@@ -49,6 +49,12 @@ function love.load()
     }
     
     -- Pause menu buttons
+    pauseContinueButton = {
+        x = width/2 - 100,
+        y = height/2 - 90,
+        width = 200,
+        height = 50
+    }
     pauseNewGameButton = {
         x = width/2 - 100,
         y = height/2 - 20,
@@ -110,6 +116,8 @@ function love.load()
         health = 3,
         xp = 0,
         xpMultiplier = 1.0,
+        attackSpeedMultiplier = 1.0,
+        rangeMultiplier = 1.0,
         level = 1,
         xpToNext = 10,
         healOnLevel = false,
@@ -277,18 +285,21 @@ function love.draw()
         -- Calculate actual damage based on selected weapon
         local weaponBaseDamage = 0
         if selectedWeapon == "sword" then
-            weaponBaseDamage = 1
+            weaponBaseDamage = 5
         elseif selectedWeapon == "boomerang" then
             weaponBaseDamage = 2
         elseif selectedWeapon == "pistol" then
             weaponBaseDamage = 2
         end
         local totalDamage = weaponBaseDamage + (player.damage or 0)
+        local attackSpeedMult = player.attackSpeedMultiplier or 1
+        local attackSpeedBonus = (1 / attackSpeedMult - 1) * 100
         
         -- Display upgrade stats
         local stats = {
             {"Max Health", player.maxHealth or 3},
             {"Damage", totalDamage},
+            {"Attack Speed", string.format("+%.0f%% faster", attackSpeedBonus)},
             {"Speed", math.floor((player.speed or 100))},
             {"XP Multiplier", string.format("%.2fx", player.xpMultiplier or 1)},
             {"Crit Chance", string.format("%.0f%%", (player.criticalHitChance or 0) * 100)},
@@ -304,13 +315,24 @@ function love.draw()
             statsY = statsY + lineHeight
         end
         
+        -- Continue button
+        love.graphics.setFont(font)
+        love.graphics.setColor(0.3, 0.3, 0.3, 1)
+        love.graphics.rectangle("fill", pauseContinueButton.x, pauseContinueButton.y, pauseContinueButton.width, pauseContinueButton.height)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.rectangle("line", pauseContinueButton.x, pauseContinueButton.y, pauseContinueButton.width, pauseContinueButton.height)
+        local buttonFont = love.graphics.newFont(24)
+        love.graphics.setFont(buttonFont)
+        local continueText = "Continue"
+        local continueWidth = buttonFont:getWidth(continueText)
+        love.graphics.print(continueText, pauseContinueButton.x + pauseContinueButton.width/2 - continueWidth/2, pauseContinueButton.y + 12)
+
         -- New Game button
         love.graphics.setFont(font)
         love.graphics.setColor(0.3, 0.3, 0.3, 1)
         love.graphics.rectangle("fill", pauseNewGameButton.x, pauseNewGameButton.y, pauseNewGameButton.width, pauseNewGameButton.height)
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.rectangle("line", pauseNewGameButton.x, pauseNewGameButton.y, pauseNewGameButton.width, pauseNewGameButton.height)
-        local buttonFont = love.graphics.newFont(24)
         love.graphics.setFont(buttonFont)
         local newGameText = "New Game"
         local newGameWidth = buttonFont:getWidth(newGameText)
@@ -381,6 +403,10 @@ function love.update(dt)
     
     -- Handle pause menu clicks
     if isPaused then
+        if isClicking(pauseContinueButton) then
+            isPaused = false
+            return
+        end
         if isClicking(pauseNewGameButton) then
             isPaused = false
             isAtTitleScreen = false
@@ -498,6 +524,8 @@ function love.update(dt)
         player.level = 1
         player.xpToNext = 10
         player.xpMultiplier = 1.0
+        player.attackSpeedMultiplier = 1.0
+        player.rangeMultiplier = 1.0
         player.damage = nil
         player.criticalHitChance = nil
         player.lifesteal = nil

@@ -4,7 +4,7 @@ local swordImage
 local attackInterval = 1.5    -- seconds between automatic slashes
 local attackDuration = 0.25   -- how long the slash is visible
 local reach = 38              -- distance from player's center to sword center
-local damage = 5                    -- damage per hit
+local damage = 5              -- damage per hit
 
 local state = {
     timer = 0,
@@ -37,8 +37,9 @@ function Sword.update(player, enemySet, dt)
             state.attackTimer = 0
         end
     else
-        if state.timer >= attackInterval then
-            state.timer = state.timer - attackInterval
+        local interval = attackInterval * (player.attackSpeedMultiplier or 1)
+        if state.timer >= interval then
+            state.timer = state.timer - interval
             state.attacking = true
             state.attackTimer = attackDuration
             state.dir = player.facing or "down"
@@ -51,62 +52,63 @@ function Sword.update(player, enemySet, dt)
     if state.attacking and enemySet then
         local iw, ih = swordImage and swordImage:getWidth() or 8, swordImage and swordImage:getHeight() or 8
         local w, h = (iw * state.drawScale) * 0.6, (ih * state.drawScale) * 0.6
+        local reachMul = player.rangeMultiplier or 1
         local px = player.x + (player.width or 0)/2
         local py = player.y + (player.height or 0)/2
-        local ax = px
-        local ay = py
-        if state.dir == "right" then
-            ax = px + reach
-            ay = py
-        elseif state.dir == "left" then
-            ax = px - reach
-            ay = py
-        elseif state.dir == "up" then
-            ax = px
-            ay = py - reach
-        else
-            ax = px
-            ay = py + reach
+
+        -- base angle from facing (asset faces up at angle 0)
+        local baseAngle = 0
+        if state.dir == "right" then baseAngle = math.pi/2
+        elseif state.dir == "down" then baseAngle = math.pi
+        elseif state.dir == "left" then baseAngle = -math.pi/2
+        else baseAngle = 0 end
+
+        local swings = {}
+        table.insert(swings, baseAngle)
+        local extra = player.extraProjectiles or 0
+        local step = math.pi / 4 -- 45 degrees per extra
+        for i = 1, extra do
+            table.insert(swings, baseAngle + step * i)
         end
 
-        local attackBox = { x = ax - w/2, y = ay - h/2, width = w, height = h }
         local isColliding = require("collisions")
-        for _, enemy in pairs(enemySet) do
-            if enemy and not state.hitEnemies[enemy] and isColliding(attackBox, enemy) then
-                -- calculate damage with critical hit chance
-                local baseDamage = damage + (player.damage or 0)
-                local critChance = player.criticalHitChance or 0
-                local isCritical = math.random() < critChance
-                local damageDealt = isCritical and (baseDamage * 2) or baseDamage
-                
-                if enemy.decreaseHealth then
-                    enemy:decreaseHealth(damageDealt)
-                else
-                    enemy.health = (enemy.health or 0) - damageDealt
-                end
-                
-                -- apply lifesteal
-                if player.lifesteal and player.lifesteal > 0 then
-                    player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
-                end
+        for _, angle in ipairs(swings) do
+            -- offset using asset-up reference: dx = reach*sin(angle), dy = -reach*cos(angle)
+            local ax = px + math.sin(angle) * reach * reachMul
+            local ay = py - math.cos(angle) * reach * reachMul
+            local attackBox = { x = ax - w/2, y = ay - h/2, width = w, height = h }
+            for _, enemy in pairs(enemySet) do
+                if enemy and not state.hitEnemies[enemy] and isColliding(attackBox, enemy) then
+                    -- calculate damage with critical hit chance
+                    local baseDamage = damage + (player.damage or 0)
+                    local critChance = player.criticalHitChance or 0
+                    local isCritical = math.random() < critChance
+                    local damageDealt = isCritical and (baseDamage * 2) or baseDamage
+                    
+                    if enemy.decreaseHealth then
+                        enemy:decreaseHealth(damageDealt)
+                    else
+                        enemy.health = (enemy.health or 0) - damageDealt
+                    end
+                    
+                    -- apply lifesteal
+                    if player.lifesteal and player.lifesteal > 0 then
+                        player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
+                    end
 
-                -- mark hit so same attack doesn't hit twice
-                state.hitEnemies[enemy] = true
+                    state.hitEnemies[enemy] = true
 
-                -- skip knockback for cornell enemy
-                if enemy.takesKnockback == false then
-                    return
+                    if enemy.takesKnockback == false then
+                        return
+                    end
+                    local dx = enemy.x + (enemy.width or 0)/2 - ax
+                    local dy = enemy.y + (enemy.height or 0)/2 - ay
+                    local dist = math.sqrt(dx*dx + dy*dy)
+                    if dist == 0 then dist = 0.0001 end
+                    local kb = enemy.knockback or 20
+                    enemy.x = enemy.x + (dx / dist) * kb
+                    enemy.y = enemy.y + (dy / dist) * kb
                 end
-                -- apply knockback to enemy away from attack center
-                local dx = enemy.x + (enemy.width or 0)/2 - ax
-                local dy = enemy.y + (enemy.height or 0)/2 - ay
-                local dist = math.sqrt(dx*dx + dy*dy)
-                if dist == 0 then dist = 0.0001 end
-                local kb = enemy.knockback or 20
-                enemy.x = enemy.x + (dx / dist) * kb
-                enemy.y = enemy.y + (dy / dist) * kb
-
-                
             end
         end
     end
@@ -125,30 +127,28 @@ function Sword.draw(player)
 
     local sx = state.drawScale or 1
     local sy = sx
-    local angle = 0
-    local dx, dy = 0, 0
 
-    -- Asset is oriented facing "up" (north). Use that as base (angle = 0).
-    -- Rotate clockwise by pi/2 for right (east), pi for down (south), -pi/2 for left (west).
-    if state.dir == "up" then
-        angle = 0
-        dx = 0
-        dy = -reach
-    elseif state.dir == "right" then
-        angle = math.pi/2
-        dx = reach
-        dy = 0
-    elseif state.dir == "down" then
-        angle = math.pi
-        dx = 0
-        dy = reach
-    else -- left
-        angle = -math.pi/2
-        dx = -reach
-        dy = 0
+    local baseAngle = 0
+    if state.dir == "right" then baseAngle = math.pi/2
+    elseif state.dir == "down" then baseAngle = math.pi
+    elseif state.dir == "left" then baseAngle = -math.pi/2
+    else baseAngle = 0 end
+
+    local swings = {}
+    table.insert(swings, baseAngle)
+    local extra = player.extraProjectiles or 0
+    local step = math.pi / 4
+    for i = 1, extra do
+        table.insert(swings, baseAngle + step * i)
     end
 
-    love.graphics.draw(swordImage, px + dx, py + dy, angle, sx, sy, ox, oy)
+    local reachMul = player.rangeMultiplier or 1
+    for _, angle in ipairs(swings) do
+        -- offset using asset-up reference: dx = reach*sin(angle), dy = -reach*cos(angle)
+        local dx = math.sin(angle) * reach * reachMul
+        local dy = -math.cos(angle) * reach * reachMul
+        love.graphics.draw(swordImage, px + dx, py + dy, angle, sx, sy, ox, oy)
+    end
 end
 
 return Sword
