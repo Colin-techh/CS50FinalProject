@@ -120,6 +120,7 @@ function love.load()
         rangeMultiplier = 1.0,
         level = 1,
         xpToNext = 10,
+        xpIncrement = 10,
         healOnLevel = false,
         knockbackResist = 0,
         isInvulnerable = false,
@@ -139,7 +140,10 @@ function love.load()
     end
     function player:levelUp()
         self.level = (self.level or 1) + 1
-        self.xpToNext = (self.level) * 10
+        local currentIncrement = self.xpIncrement or 10
+        local nextIncrement = math.ceil(currentIncrement * 1.05)
+        self.xpIncrement = nextIncrement
+        self.xpToNext = (self.xpToNext or 0) + nextIncrement
         upgrades = require("upgrades")
         upgradeChoices = upgrades.getRandomChoices(3, self.level)
         showUpgradeMenu = true
@@ -524,6 +528,7 @@ function love.update(dt)
         player.xp = 0
         player.level = 1
         player.xpToNext = 10
+        player.xpIncrement = 10
         player.xpMultiplier = 1.0
         player.attackSpeedMultiplier = 1.0
         player.rangeMultiplier = 1.0
