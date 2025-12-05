@@ -21,9 +21,22 @@ function smokeCloud:new(x, y, radius)
     return obj
 end
 function smokeCloud:update(options)
-    local dt,player = options.dt, options.player
-    self.age = self.age + dt
-    self.radius = self.radius + dt * 10 -- Expand radius over time
+    -- support both calling conventions:
+    --  1) update(dt)  -- main update loop passes a number
+    --  2) update({ dt = dt, player = player }) -- optional table form
+    local dt, player
+    if type(options) == "table" then
+        dt = options.dt
+        player = options.player
+    else
+        dt = options
+        -- try to fall back to the global player if present
+        player = _G.player
+    end
+    dt = dt or 0
+
+    self.age = (self.age or 0) + dt
+    self.radius = (self.radius or 0) + dt * 10 -- Expand radius over time
     if self.age >= self.lifetime then
         self.isExpired = true
     end
@@ -32,8 +45,10 @@ function smokeCloud:update(options)
     local dx = player.x + player.width/2 - self.x
     local dy = player.y + player.height/2 - self.y
     local distance = math.sqrt(dx*dx + dy*dy)
-    if distance < self.radius then
-        player.health = player.health - self.damage * dt
+    if player and type(player.x) == "number" and type(player.y) == "number" and type(player.width) == "number" and type(player.height) == "number" then
+        if distance < self.radius then
+            player.health = player.health - self.damage * dt
+        end
     end
 end
 function smokeCloud:draw()

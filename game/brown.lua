@@ -18,16 +18,22 @@ function brownEnemy:attack()
     table.insert(projectiles, cloud)
 end
 function brownEnemy:update(options)
-    player, dt, enemySet = options.player, options.dt, options.enemySet
+    local player = options and options.player
+    local dt = (options and options.dt) or 0
+    local enemySet = options and options.enemySet or {}
+    if not player then return end
+
     for index, enemy in pairs(enemySet) do
-        local collides = require("collisions")(enemy, self)
-        if collides then
-            local dx = self.x - enemy.x
-            local dy = self.y - enemy.y
-            local dist = math.sqrt(dx*dx + dy*dy)
-            if dist == 0 then dist = 0.0001 end
-            self.x = self.x + (dx / dist) * 1
-            self.y = self.y + (dy / dist) * 1
+        if enemy ~= self then
+            local collides = require("collisions")(enemy, self)
+            if collides then
+                local dx = self.x - enemy.x
+                local dy = self.y - enemy.y
+                local dist = math.sqrt(dx*dx + dy*dy)
+                if dist == 0 then dist = 0.0001 end
+                self.x = self.x + (dx / dist) * 1
+                self.y = self.y + (dy / dist) * 1
+            end
         end
     end
 

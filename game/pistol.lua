@@ -64,7 +64,10 @@ local function spawnBullet(px, py, vx, vy)
     b.isExpired = false
 
     function b:update(options)
-        local dt = options.dt
+        -- support both numeric dt (from main loop) and { dt = <num> } table form
+        local dt
+        if type(options) == "table" then dt = options.dt else dt = options end
+        dt = dt or 0
         self.x = self.x + self.vX * self.speed * dt
         self.y = self.y + self.vY * self.speed * dt
         self.age = self.age + dt
