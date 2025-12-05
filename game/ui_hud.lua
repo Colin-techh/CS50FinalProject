@@ -4,14 +4,15 @@ local ui_hud = {}
 -- Draw basic HUD info (health, XP, enemy count)
 function ui_hud.drawBasic(player, enemyCount)
     love.graphics.setColor(0, 0, 0, 0.6)
-    love.graphics.rectangle("fill", 5, 5, 120, 50)
+    love.graphics.rectangle("fill", 5, 5, 120, 70)
 
     love.graphics.setColor(1, 1, 1)
-    love.graphics.rectangle("line", 5, 5, 120, 50)
+    love.graphics.rectangle("line", 5, 5, 120, 70)
 
     love.graphics.print("Health: " .. player.health, 12, 12)
-    love.graphics.print("XP:     " .. player.xp,     12, 30)
-
+    love.graphics.print("Level:  " .. player.level, 12, 30)
+    love.graphics.print("XP:     " .. player.xp,     12, 48)
+    
     love.graphics.setColor(1, 1, 1)
 end
 
