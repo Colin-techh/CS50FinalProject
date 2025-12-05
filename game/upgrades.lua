@@ -49,6 +49,47 @@ local pool = {
         apply = function(player)
             player.knockbackResist = (player.knockbackResist or 0) + 0.20
         end
+    },
+    {
+        id = "critical_hit",
+        name = "Critical Hit Chance +5%",
+        desc = "Gain a 5% chance to deal double damage on attacks.",
+        apply = function(player)
+            player.criticalHitChance = (player.criticalHitChance or 0) + 0.05
+        end
+    },
+    {
+        id = "health_regen",
+        name = "Health Regeneration",
+        desc = "Regenerate 1 HP every 10 seconds.",
+        apply = function(player)
+            player.healthRegen = (player.healthRegen or 0) + 1
+            player.healthRegenInterval = 10
+        end
+    },
+    {
+        id = "extra_projectile",
+        name = "Extra Projectile",
+        desc = "Shoot an additional projectile with each attack.",
+        apply = function(player)
+            player.extraProjectiles = (player.extraProjectiles or 0) + 1
+        end
+    },
+    {
+        id = "lifesteal",
+        name = "Lifesteal",
+        desc = "Heal for 5% of damage dealt to enemies.",
+        apply = function(player)
+            player.lifesteal = (player.lifesteal or 0) + 0.05
+        end
+    },
+    {
+        id = "damage",
+        name = "Damage +1",
+        desc = "Increase damage dealt by 1.",
+        apply = function(player)
+            player.damage = (player.damage or 1) + 1
+        end
     }
 }
 

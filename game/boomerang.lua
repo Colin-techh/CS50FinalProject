@@ -109,12 +109,22 @@ function Boomerang.update(player, enemySet, dt)
         local attackBox = { x = state.x - w/2, y = state.y - h/2, width = w, height = h }
         local isColliding = require("collisions")
         for _, enemy in pairs(enemySet) do
-            if enemy and not state.hitEnemies[enemy] and isColliding(attackBox, enemy) then
-                -- apply damage
+            if enemy and not state.hitEnemies[enemy] and isColliding(state, enemy) then
+                -- calculate damage with critical hit chance
+                local baseDamage = 2 + (player.damage or 0)
+                local critChance = player.criticalHitChance or 0
+                local isCritical = math.random() < critChance
+                local damageDealt = isCritical and (baseDamage * 2) or baseDamage
+                
                 if enemy.decreaseHealth then
-                    enemy:decreaseHealth(damage)
+                    enemy:decreaseHealth(damageDealt)
                 else
-                    enemy.health = (enemy.health or 0) - damage
+                    enemy.health = (enemy.health or 0) - damageDealt
+                end
+                
+                -- apply lifesteal
+                if player.lifesteal and player.lifesteal > 0 then
+                    player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
                 end
                 -- knockback
                 local ex = (enemy.x or 0) + (enemy.width or 0)/2

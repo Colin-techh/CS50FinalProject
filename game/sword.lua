@@ -73,12 +73,21 @@ function Sword.update(player, enemySet, dt)
         local isColliding = require("collisions")
         for _, enemy in pairs(enemySet) do
             if enemy and not state.hitEnemies[enemy] and isColliding(attackBox, enemy) then
-                -- apply damage
-                local damage = 1
+                -- calculate damage with critical hit chance
+                local baseDamage = 1 + (player.damage or 0)
+                local critChance = player.criticalHitChance or 0
+                local isCritical = math.random() < critChance
+                local damageDealt = isCritical and (baseDamage * 2) or baseDamage
+                
                 if enemy.decreaseHealth then
-                    enemy:decreaseHealth(damage)
+                    enemy:decreaseHealth(damageDealt)
                 else
-                    enemy.health = (enemy.health or 0) - damage
+                    enemy.health = (enemy.health or 0) - damageDealt
+                end
+                
+                -- apply lifesteal
+                if player.lifesteal and player.lifesteal > 0 then
+                    player.health = math.min(player.health + damageDealt * player.lifesteal, player.maxHealth)
                 end
 
                 -- apply knockback to enemy away from attack center

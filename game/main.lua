@@ -278,6 +278,16 @@ function love.update(dt)
     -- If upgrade menu is open, freeze the world (no camera movement, enemies, projectiles, or player updates)
     if not showUpgradeMenu then
         camera:lookAt(player.x, player.y)
+        
+        -- update health regeneration
+        if player.healthRegen and player.healthRegen > 0 then
+            player.healthRegenTimer = (player.healthRegenTimer or 0) + dt
+            if player.healthRegenTimer >= (player.healthRegenInterval or 10) then
+                player.health = math.min(player.health + player.healthRegen, player.maxHealth)
+                player.healthRegenTimer = 0
+            end
+        end
+        
         -- update player movement
         require("playerMovement").update(player, key_mappings, dt)
         -- update only the selected weapon
@@ -325,7 +335,23 @@ function love.update(dt)
     -- handle death / reset here so gameplay module doesn't need global state
     if player.health <= 0 then
         isAtTitleScreen = true
+        -- reset all player stats for new run
         player.health = 3
+        player.maxHealth = 3
+        player.xp = 0
+        player.level = 1
+        player.xpToNext = 10
+        player.xpMultiplier = 1.0
+        player.damage = nil
+        player.criticalHitChance = nil
+        player.lifesteal = nil
+        player.healthRegen = nil
+        player.healthRegenTimer = 0
+        player.healthRegenInterval = 10
+        player.extraProjectiles = nil
+        player.speed = 100
+        player.knockbackResist = 0
+        player.invulnDuration = 1.0
         if background then
             player.x = math.floor(background:getWidth() / 2 - (player.width or 0) / 2)
             player.y = math.floor(background:getHeight() / 2 - (player.height or 0) / 2)
