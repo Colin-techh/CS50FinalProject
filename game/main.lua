@@ -12,6 +12,9 @@ function love.load()
     isColliding = require("collisions")
     isClicking = require("isClicking")
     isAtTitleScreen = true
+    isChoosingWeapon = false
+    selectedWeapon = nil -- "sword" | "boomerang" | "pistol"
+    weaponSelectionBuffer = 0
     -- Press play
     startImage = love.graphics.newImage("assets/startImage.png")
     playButton = {
@@ -32,6 +35,11 @@ function love.load()
     -- pistol (player weapon)
     pistol = require("pistol")
     pistol.load()
+
+    -- UI selection images (reuse assets)
+    selectionSwordImage = love.graphics.newImage("assets/sword.png")
+    selectionBoomerangImage = love.graphics.newImage("assets/boomerang.png")
+    selectionPistolImage = love.graphics.newImage("assets/pistol.png")
     
     key_mappings = {
         up    = {"w", "up"},
@@ -109,6 +117,27 @@ function love.draw()
         return
     end
 
+    -- weapon selection UI (screen-space)
+    if isChoosingWeapon and weaponChoices and weaponChoiceRects then
+        love.graphics.setColor(0,0,0,0.6)
+        love.graphics.rectangle("fill", 0, 0, width, height)
+        love.graphics.setColor(1,1,1)
+        love.graphics.printf("Choose your starting weapon!", 0, height/2 - 160, width, "center")
+        for i, rect in ipairs(weaponChoiceRects) do
+            love.graphics.setColor(0.12,0.12,0.12,0.95)
+            love.graphics.rectangle("fill", rect.x, rect.y, rect.width, rect.height, 8, 8)
+            love.graphics.setColor(1,1,1)
+            love.graphics.printf(rect.title, rect.x, rect.y + 8, rect.width, "center")
+            if rect.image then
+                local iw, ih = rect.image:getWidth(), rect.image:getHeight()
+                local scale = math.min((rect.width-40)/iw, (rect.height-60)/ih)
+                love.graphics.draw(rect.image, rect.x + rect.width/2, rect.y + rect.height/2 + 8, 0, scale, scale, iw/2, ih/2)
+            end
+            love.graphics.print("("..i..")", rect.x + 8, rect.y + 8)
+        end
+        return
+    end
+
     -- Attach camera so the view follows the player
     camera:attach()
 
@@ -125,8 +154,10 @@ function love.draw()
     end
 
     love.graphics.draw(playerImage, player.x, player.y)
-    -- draw pistol on player
-    pistol.draw(player)
+    -- draw selected weapon on player (only one enabled)
+    if selectedWeapon == "pistol" then
+        pistol.draw(player)
+    end
     love.graphics.setColor(1, 1, 1, 1)
 
     for index, enemy in pairs(enemySet) do
@@ -135,10 +166,13 @@ function love.draw()
     for index, projectile in pairs(projectiles) do
         projectile:draw()
     end
-    -- draw sword slash (world space)
-    sword.draw(player)
-    -- draw boomerang (pass enemySet so it can hide when no enemies)
-    boomerang.draw(player, enemySet)
+    -- draw selected weapon visuals
+    if selectedWeapon == "sword" then
+        sword.draw(player)
+    end
+    if selectedWeapon == "boomerang" then
+        boomerang.draw(player, enemySet)
+    end
     camera:detach()
 
     -- Draw HUD elements in screen space
@@ -192,6 +226,30 @@ function love.draw()
 end
 
 function love.keypressed(key)
+    -- weapon selection via number keys
+    if isChoosingWeapon and weaponChoiceRects and weaponChoices then
+        -- block key selection while the initial click buffer is active
+        if not weaponSelectionBuffer or weaponSelectionBuffer <= 0 then
+            local n = tonumber(key)
+            if n and weaponChoiceRects[n] then
+                selectedWeapon = weaponChoiceRects[n].id
+                isChoosingWeapon = false
+                weaponChoiceRects = nil
+                weaponChoices = nil
+                return
+            end
+            if key:sub(1,2) == "kp" then
+                local k = tonumber(key:sub(3))
+                if k and weaponChoiceRects[k] then
+                    selectedWeapon = weaponChoiceRects[k].id
+                    isChoosingWeapon = false
+                    weaponChoiceRects = nil
+                    weaponChoices = nil
+                    return
+                end
+            end
+        end
+    end
     -- allow number key selection when upgrade menu is active
     if showUpgradeMenu and upgradeChoices then
         -- accept both main row and numpad keys ("1", "2", "3")
@@ -221,11 +279,43 @@ end
 
 function love.update(dt)
     if isClicking(playButton) and isAtTitleScreen then
+        -- go to weapon selection screen before starting the game
         isAtTitleScreen = false
+        isChoosingWeapon = true
+        selectedWeapon = nil
+        weaponSelectionBuffer = 1.0 -- seconds to ignore immediate selection clicks/keys
+        -- prepare weapon choices and rects for input (positions computed once)
+        local choices = {
+            { id = "sword", image = selectionSwordImage, title = "Sword" },
+            { id = "boomerang", image = selectionBoomerangImage, title = "Boomerang" },
+            { id = "pistol", image = selectionPistolImage, title = "Pistol" }
+        }
+        local n = #choices
+        local boxW = math.min(300, math.floor((width - 80 - (n-1)*20) / n))
+        if boxW < 100 then boxW = 100 end
+        local boxH = 160
+        local gap = 20
+        local startX = (width - (boxW * n + gap * (n - 1))) / 2
+        weaponChoiceRects = {}
+        weaponChoices = choices
+        for i, ch in ipairs(choices) do
+            local bx = startX + (i-1) * (boxW + gap)
+            local by = height/2 - boxH/2
+            weaponChoiceRects[i] = { x = bx, y = by, width = boxW, height = boxH, id = ch.id, image = ch.image, title = ch.title }
+        end
     end
 
     if isAtTitleScreen then
         return
+    end
+
+    -- if weapon selection is active, skip world updates but continue so input (mouse/key) is processed
+    if isChoosingWeapon then
+        -- tick down the selection buffer so accidental input right after pressing Start is ignored
+        if weaponSelectionBuffer and weaponSelectionBuffer > 0 then
+            weaponSelectionBuffer = math.max(0, weaponSelectionBuffer - dt)
+        end
+        -- do nothing else here; later code will handle input for selection
     end
 
     -- If upgrade menu is open, freeze the world (no camera movement, enemies, projectiles, or player updates)
@@ -233,12 +323,16 @@ function love.update(dt)
         camera:lookAt(player.x, player.y)
         -- update player movement
         require("playerMovement").update(player, key_mappings, dt)
-        -- update sword timing/attacks (pass enemySet for hit detection)
-        sword.update(player, enemySet, dt)
-        -- update boomerang
-        boomerang.update(player, enemySet, dt)
-        -- update pistol (handles firing)
-        pistol.update(player, enemySet, dt)
+        -- update only the selected weapon
+        if selectedWeapon == "sword" then
+            sword.update(player, enemySet, dt)
+        end
+        if selectedWeapon == "boomerang" then
+            boomerang.update(player, enemySet, dt)
+        end
+        if selectedWeapon == "pistol" then
+            pistol.update(player, enemySet, dt)
+        end
         -- update colision and handle damage
         for index, enemy in pairs(enemySet) do
             require("handleDamage")({player = player, enemy = enemy})
@@ -267,6 +361,22 @@ function love.update(dt)
                 projectile:update({player=player, dt=dt})
                 if projectile.isExpired then
                     table.remove(projectiles, index)
+                end
+            end
+        end
+    end
+
+    -- weapon selection input handling (mouse click)
+    if isChoosingWeapon and weaponChoiceRects then
+        -- only allow selection after the buffer expires to avoid accidental immediate clicks
+        if not weaponSelectionBuffer or weaponSelectionBuffer <= 0 then
+            for i, rect in ipairs(weaponChoiceRects) do
+                if isClicking(rect) then
+                    selectedWeapon = rect.id
+                    isChoosingWeapon = false
+                    weaponChoiceRects = nil
+                    weaponChoices = nil
+                    break
                 end
             end
         end
