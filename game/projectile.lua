@@ -28,4 +28,24 @@ function projectileClass:update(dt)
         self.isExpired = true
     end
 end
+
+-- Helper: find the closest enemy to a player from an enemySet
+function projectileClass.findClosestEnemy(player, enemySet)
+    if not enemySet then return nil end
+    local best, bestDist = nil, math.huge
+    for _, enemy in pairs(enemySet) do
+        if enemy and (enemy.health == nil or enemy.health > 0) then
+            local ex = (enemy.x or 0) + (enemy.width or 0)/2
+            local ey = (enemy.y or 0) + (enemy.height or 0)/2
+            local px = player.x + (player.width or 0)/2
+            local py = player.y + (player.height or 0)/2
+            local dx = ex - px
+            local dy = ey - py
+            local d = math.sqrt(dx*dx + dy*dy)
+            if d < bestDist then bestDist = d; best = enemy end
+        end
+    end
+    return best
+end
+
 return projectileClass

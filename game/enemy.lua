@@ -10,7 +10,7 @@ function enemy:new(options)
         speed = speed or 50,
         damage = damage or 1,
         knockback = knockback or 20,
-        xp = xp or 5;
+        xp = options.xp or 5,
         image = love.graphics.newImage(imagePath or "assets/enemy1.png")
     }
     obj.__index = self

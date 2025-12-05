@@ -26,6 +26,12 @@ function love.load()
     -- sword (automatic slash)
     sword = require("sword")
     sword.load()
+        -- boomerang (auto-launch toward nearest enemy when returned)
+        boomerang = require("boomerang")
+        boomerang.load()
+    -- pistol (player weapon)
+    pistol = require("pistol")
+    pistol.load()
     
     key_mappings = {
         up    = {"w", "up"},
@@ -59,7 +65,8 @@ function love.load()
         isInvulnerable = false,
         invulnTimer = 0,
                 invulnDuration = 1.0,
-                facing = "down"
+                facing = "down",
+                lastHorizontalFacing = "right"
     }
 
     -- Projectiles
@@ -93,6 +100,8 @@ function love.draw()
     end
 
     love.graphics.draw(playerImage, player.x, player.y)
+    -- draw pistol on player
+    pistol.draw(player)
     love.graphics.setColor(1, 1, 1, 1)
 
     for index, enemy in pairs(enemySet) do
@@ -103,6 +112,8 @@ function love.draw()
     end
     -- draw sword slash (world space)
     sword.draw(player)
+    -- draw boomerang (pass enemySet so it can hide when no enemies)
+    boomerang.draw(player, enemySet)
     camera:detach()
 
     -- Draw HUD elements in screen space
@@ -125,6 +136,10 @@ function love.update(dt)
     require("playerMovement").update(player, key_mappings, dt)
     -- update sword timing/attacks (pass enemySet for hit detection)
     sword.update(player, enemySet, dt)
+    -- update boomerang
+    boomerang.update(player, enemySet, dt)
+    -- update pistol (handles firing)
+    pistol.update(player, enemySet, dt)
     -- update colision and handle damage
     for index, enemy in pairs(enemySet) do
         require("handleDamage")({player = player, enemy = enemy})
