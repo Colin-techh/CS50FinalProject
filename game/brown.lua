@@ -14,7 +14,7 @@ function brownEnemy:draw()
 end
 function brownEnemy:attack()
     -- Create smoke cloud that deals DoT to player if they are inside it
-    local cloud = smokeCloud:new(self.x + self.width/2, self.y + self.height/2, 50)
+    local cloud = smokeCloud:new(self.x + self.width/2, self.y + self.height/2, 2)
     table.insert(projectiles, cloud)
 end
 function brownEnemy:update(options)
@@ -41,7 +41,7 @@ function brownEnemy:update(options)
 
     -- Every five seconds call attack function with a cooldown
     if not self.attackTimer then
-        self.attackTimer = 0
+        self.attackTimer = math.random() * 5
     end
     self.attackTimer = self.attackTimer + dt
     if self.attackTimer >= 5 then
