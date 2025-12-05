@@ -309,13 +309,26 @@ function love.update(dt)
         return
     end
 
-    -- if weapon selection is active, skip world updates but continue so input (mouse/key) is processed
+    -- if weapon selection is active, skip world updates and process selection input here
     if isChoosingWeapon then
         -- tick down the selection buffer so accidental input right after pressing Start is ignored
         if weaponSelectionBuffer and weaponSelectionBuffer > 0 then
             weaponSelectionBuffer = math.max(0, weaponSelectionBuffer - dt)
         end
-        -- do nothing else here; later code will handle input for selection
+        -- process clicks immediately (only after the buffer has expired)
+        if weaponChoiceRects and (not weaponSelectionBuffer or weaponSelectionBuffer <= 0) then
+            for i, rect in ipairs(weaponChoiceRects) do
+                if isClicking(rect) then
+                    selectedWeapon = rect.id
+                    isChoosingWeapon = false
+                    weaponChoiceRects = nil
+                    weaponChoices = nil
+                    break
+                end
+            end
+        end
+        -- do not run any other game updates while choosing the starting weapon
+        return
     end
 
     -- If upgrade menu is open, freeze the world (no camera movement, enemies, projectiles, or player updates)
