@@ -200,6 +200,19 @@ function love.update(dt)
         if action == "continue" then
             isPaused = false
         elseif action == "newGame" then
+            -- Reset player stats for new game
+            gameState.resetPlayer(player)
+            if background then
+                player.x = math.floor(background:getWidth() / 2 - (player.width or 0) / 2)
+                player.y = math.floor(background:getHeight() / 2 - (player.height or 0) / 2)
+            else
+                player.x = 300
+                player.y = 300
+            end
+            -- Reset game state
+            enemySet = {}
+            projectiles = {}
+            gameTimer = 0
             isPaused = false
             isAtTitleScreen = false
             isChoosingWeapon = true
