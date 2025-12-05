@@ -4,7 +4,7 @@ local swordImage
 local attackInterval = 1.5    -- seconds between automatic slashes
 local attackDuration = 0.25   -- how long the slash is visible
 local reach = 38              -- distance from player's center to sword center
-damage = 1                    -- damage per hit
+damage = 5                    -- damage per hit
 
 local state = {
     timer = 0,

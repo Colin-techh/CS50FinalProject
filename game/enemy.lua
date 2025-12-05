@@ -48,8 +48,15 @@ function enemy:update(options)
                 local dy = self.y - other.y
                 local dist = math.sqrt(dx*dx + dy*dy)
                 if dist == 0 then dist = 0.0001 end
-                self.x = self.x + (dx / dist) * 1
-                self.y = self.y + (dy / dist) * 1
+                local newX = self.x + (dx / dist) * 1
+                local newY = self.y + (dy / dist) * 1
+                -- apply push-back with boundary checks
+                if newX >= 0 and newX + (self.width or 0) <= 5000 then
+                    self.x = newX
+                end
+                if newY >= 0 and newY + (self.height or 0) <= 5000 then
+                    self.y = newY
+                end
             end
         end
     end
@@ -68,12 +75,20 @@ function enemy:update(options)
 
         local moved = false
         if not blockedX then
-            self.x = self.x + moveX
-            moved = true
+            local newX = self.x + moveX
+            -- check boundary (0 to 5000)
+            if newX >= 0 and newX + (self.width or 0) <= 5000 then
+                self.x = newX
+                moved = true
+            end
         end
         if not blockedY then
-            self.y = self.y + moveY
-            moved = true
+            local newY = self.y + moveY
+            -- check boundary (0 to 5000)
+            if newY >= 0 and newY + (self.height or 0) <= 5000 then
+                self.y = newY
+                moved = true
+            end
         end
 
         -- simple detour: if both axes blocked attempt a perpendicular step to go around
