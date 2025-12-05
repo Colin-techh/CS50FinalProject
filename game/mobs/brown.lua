@@ -3,7 +3,7 @@ brownEnemy = {}
 setmetatable(brownEnemy, {__index = enemy})
 require("smokeCloud")
 function brownEnemy:new(xx, yy)
-    local obj = enemy:new({x=xx, y=yy, width=21, height=29, speed=100, damage=1, knockback=48, health=8, xp=8, imagePath="assets/enemy2.png"})
+    local obj = enemy:new({x=xx, y=yy, width=21, height=29, speed=75, damage=1, knockback=48, health=8, xp=8, imagePath="assets/enemy2.png"})
     
     setmetatable(obj, {__index = self})
     return obj

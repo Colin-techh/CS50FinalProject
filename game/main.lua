@@ -14,7 +14,7 @@ camera = Camera(0, 0)
 player = require("player")
 
 function love.load()
-    love.window.setTitle("My Awesome Game")
+    love.window.setTitle("Yuck Fale")
     width, height = love.graphics.getDimensions()
     
     -- Background image
