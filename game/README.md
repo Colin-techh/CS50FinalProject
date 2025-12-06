@@ -8,6 +8,8 @@ The source code .lua files are submitted with this README and DESIGN. Unless Lov
 
 https://drive.google.com/drive/folders/1s3dm1Zo24l7p6gvMwV-Rh6b8VHgEvsFm?usp=sharing
 
+In this link are .zip files, to run the game, you need to download the .zip, unzip it (to like your downloads folder or something it does not matter), and then run the YuckFale executable in this file and the game should open up as a LOVE window for you to play.
+
 Depending on your settings, your operating system may throw security warnings. We assure you that the executables are perfectly safe.
 
 
