@@ -20,4 +20,4 @@ This game is built using the LOVE2D game engine with the Lua programming languag
 
 Video: https://youtu.be/pk_gjErTEfw
 
-Note: the game runs MUCH smoother than our video shows, but the recording software we used captured at a low frame rate and so the video makes the game look laggy. The game runs seamlessly for Colin and I on our own computers when launching from the executable)
+Note: the game runs MUCH smoother than our video shows, but the recording software we used captured at a low frame rate and so the video makes the game look laggy. The game runs seamlessly for Colin and I on our own computers when launching from the executable
